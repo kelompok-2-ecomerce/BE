@@ -4,6 +4,9 @@ import (
 	"log"
 	"projects/config"
 
+	id "projects/features/item/data"
+	ihl "projects/features/item/handler"
+	isrv "projects/features/item/services"
 	"projects/features/user/data"
 	"projects/features/user/handler"
 	"projects/features/user/services"
@@ -22,6 +25,10 @@ func main() {
 	userSrv := services.New(userData)
 	userHdl := handler.New(userSrv)
 
+	itemData := id.New(db)
+	itemsrv := isrv.New(itemData)
+	itemHdl := ihl.New(itemsrv)
+
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -34,6 +41,8 @@ func main() {
 	e.GET("/myprofile", userHdl.Profile(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/users", userHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/users", userHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
+
+	e.POST("/items", itemHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
