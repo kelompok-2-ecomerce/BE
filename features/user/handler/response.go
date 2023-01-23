@@ -3,17 +3,11 @@ package handler
 import "projects/features/user"
 
 type UserReponse struct {
-	ID       uint   `json:"id"`
-	Nama     string `json:"nama"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Foto     string `json:"foto"`
-	HP       string `json:"hp"`
-	Alamat   string `json:"alamat"`
-}
-type LoginReponse struct {
-	Nama  string `json:"nama"`
-	Email string `json:"email"`
+	Nama   string `json:"nama"`
+	Email  string `json:"email"`
+	Foto   string `json:"foto"`
+	HP     string `json:"hp"`
+	Alamat string `json:"alamat"`
 }
 
 type RegisterResponse struct {
