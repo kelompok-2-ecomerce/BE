@@ -5,7 +5,7 @@ import (
 
 	"log"
 
-	
+	item "projects/features/item/data"
 	user "projects/features/user/data"
 
 	"gorm.io/driver/mysql"
@@ -26,5 +26,6 @@ func InitDB(ac AppConfig) *gorm.DB {
 
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(user.User{})
+	db.AutoMigrate(item.Item{})
 
 }
