@@ -11,7 +11,7 @@ type Core struct {
 	Nama_Barang string `validate:"required"`
 	Image_url   string
 	NamaUser    string
-	Deskripsi   string
+	Deskripsi   string `validate:"required"`
 	Harga       float64
 	Stok        int
 	CreatedAt   time.Time
