@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"projects/features/user"
 	helper "projects/helper"
@@ -79,6 +81,21 @@ func (uc *userControll) Update() echo.HandlerFunc {
 		ex := c.Get("user")
 
 		input := UpdateRequest{}
+		file, errPath := c.FormFile("foto")
+
+		fmt.Print("error get path handler, err = ", errPath)
+
+		if file != nil {
+			res, err := helper.UploadImage(c)
+			// fmt.Println(res)
+			if err != nil {
+				fmt.Println(err)
+				return errors.New("create gambar failed cannot upload data")
+			}
+			input.Foto = res
+			// fmt.Println(input.Image_url)
+		}
+
 		if err := c.Bind(&input); err != nil {
 			return c.JSON(http.StatusBadRequest, "format inputan salah")
 		}

@@ -24,7 +24,7 @@ func ToCore(data User) user.Core {
 		Password: data.Password,
 		Foto:     data.Foto,
 		Alamat:   data.Alamat,
-		HP:       data.Alamat,
+		HP:       data.HP,
 	}
 }
 
