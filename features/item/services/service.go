@@ -61,6 +61,26 @@ func (*itemSrv) MyPost(token interface{}) ([]item.Core, error) {
 }
 
 // Update implements item.ItemService
-func (*itemSrv) Update(token interface{}, itemID int, updatedData item.Core) (item.Core, error) {
-	panic("unimplemented")
+func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core) (item.Core, error) {
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return item.Core{}, errors.New("id user not found")
+	}
+	if validasieror := ps.validasi.Struct(updatedData); validasieror != nil {
+		return item.Core{}, nil
+	}
+
+	res, err := ps.data.Update(userID, itemID, updatedData)
+	if err != nil {
+		fmt.Println(err)
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "item not found"
+		} else {
+			msg = "internal server error"
+		}
+		return item.Core{}, errors.New(msg)
+	}
+
+	return res, nil
 }
