@@ -6,25 +6,25 @@ import (
 
 type ItemResponse struct {
 	ID          uint    `json:"id"`
-	Nama_Barang string  `json:"nama_barang"`
+	Nama_Barang string  `json:"name"`
 	Harga       float64 `json:"harga"`
 	Stok        int     `json:"stok"`
-	Deskripsi   string  `json:"deskripsi"`
+	Deskripsi   string  `json:"description"`
 	Image_url   string  `json:"image"`
-	Nama_User   string  `json:"nama_user"`
+	Nama_User   string  `json:"penjual"`
 }
 type AddItemResponse struct {
-	Nama_Barang string  `json:"nama_barang"`
+	Nama_Barang string  `json:"name"`
 	Harga       float64 `json:"harga"`
 	Stok        int     `json:"stok"`
-	Deskripsi   string  `json:"deskripsi"`
+	Deskripsi   string  `json:"description"`
 	Image_url   string  `json:"image"`
 }
 type updateItemResponse struct {
-	Nama_Barang string  `json:"nama_barang"`
+	Nama_Barang string  `json:"name"`
 	Harga       float64 `json:"harga"`
 	Stok        int     `json:"stok"`
-	Deskripsi   string  `json:"deskripsi"`
+	Deskripsi   string  `json:"description"`
 	Image_url   string  `json:"image"`
 }
 

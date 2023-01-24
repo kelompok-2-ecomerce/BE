@@ -3,15 +3,15 @@ package handler
 import "projects/features/user"
 
 type UserReponse struct {
-	Nama   string `json:"nama"`
+	Nama   string `json:"name"`
 	Email  string `json:"email"`
-	Foto   string `json:"foto"`
-	HP     string `json:"hp"`
-	Alamat string `json:"alamat"`
+	Foto   string `json:"photo"`
+	HP     string `json:"phone_number"`
+	Alamat string `json:"address"`
 }
 
 type RegisterResponse struct {
-	Nama  string `json:"nama"`
+	Nama  string `json:"name"`
 	Email string `json:"email"`
 }
 
