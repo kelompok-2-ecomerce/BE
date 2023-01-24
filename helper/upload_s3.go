@@ -51,17 +51,17 @@ func UploadImage(c echo.Context) (string, error) {
 
 	s3Config := &aws.Config{
 		Region:      aws.String(os.Getenv("AWS_REGION")),
-		Credentials: credentials.NewStaticCredentials(os.Getenv("ACCESS_KEY_IAM"), os.Getenv("SECRET_KEY_IAM"), ""),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_KEY"), os.Getenv("S3_SECRET"), ""),
 	}
 	s3Session := session.New(s3Config)
 
 	uploader := s3manager.NewUploader(s3Session)
 
 	input := &s3manager.UploadInput{
-		Bucket:      aws.String(os.Getenv("AWS_BUCKET_NAME")),                       // bucket's name
-		Key:         aws.String("posting/" + randomStr + "-" + fileheader.Filename), // files destination location
-		Body:        file,                                                           // content of the file
-		ContentType: aws.String("image/jpg"),                                        // content type
+		Bucket:      aws.String(os.Getenv("AWS_BUCKET")),                           // bucket's name
+		Key:         aws.String("images/" + randomStr + "-" + fileheader.Filename), // files destination location
+		Body:        file,                                                          // content of the file
+		ContentType: aws.String("image/jpg"),                                       // content type
 	}
 	res, err := uploader.UploadWithContext(context.Background(), input)
 	fmt.Println("\n\nerror upload to s3. err = ", err)
