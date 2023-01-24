@@ -47,3 +47,11 @@ func ToCore(data Item) item.Core {
 		Stok:        data.Stok,
 	}
 }
+func ToCoreArr(data []Item) []item.Core {
+	arrRes := []item.Core{}
+	for _, v := range data {
+		tmp := ToCore(v)
+		arrRes = append(arrRes, tmp)
+	}
+	return arrRes
+}

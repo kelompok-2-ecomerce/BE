@@ -94,8 +94,18 @@ func (*itemSrv) Delete(token interface{}, itemID int) error {
 }
 
 // GetAllPost implements item.ItemService
-func (*itemSrv) GetAllPost() ([]item.Core, error) {
-	panic("unimplemented")
+func (is *itemSrv) GetAllProducts() ([]item.Core, error) {
+	res, err := is.data.GetAllProducts()
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data tidak ditemukan"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return []item.Core{}, errors.New(msg)
+	}
+	return res, nil
 }
 
 // MyPost implements item.ItemService

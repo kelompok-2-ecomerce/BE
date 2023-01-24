@@ -47,9 +47,23 @@ func (*itemData) Delete(userID int, itemID int) error {
 	panic("unimplemented")
 }
 
-// GetAllPost implements item.ItemData
-func (*itemData) GetAllPost() ([]item.Core, error) {
-	panic("unimplemented")
+// GetAllProducts implements item.ItemData
+func (id *itemData) GetAllProducts() ([]item.Core, error) {
+	res := []Item{}
+
+	err := id.db.Raw(`
+	SELECT i.id , i.nama_barang , i.image_url , u.nama "NamaUser", u.alamat , i.deskripsi ,i.harga , i.stok 
+	FROM items i 
+	JOIN users u ON u.id = i.user_id
+	WHERE i.deleted_at IS NULL
+	ORDER BY i.id DESC;
+	`).Scan(&res).Error
+	if err != nil {
+		log.Println("list book query error :", err.Error())
+		return []item.Core{}, err
+	}
+
+	return ToCoreArr(res), nil
 }
 
 // MyPost implements item.ItemData

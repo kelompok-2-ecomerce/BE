@@ -11,6 +11,7 @@ type ItemResponse struct {
 	Stok        int     `json:"stok"`
 	Deskripsi   string  `json:"description"`
 	Image_url   string  `json:"image"`
+	Alamat      string  `json:"address"`
 	Nama_User   string  `json:"penjual"`
 }
 type AddItemResponse struct {
@@ -55,6 +56,7 @@ func ToResponse(feature string, item item.Core) interface{} {
 			Deskripsi:   item.Deskripsi,
 			Image_url:   item.Image_url,
 			Nama_User:   item.NamaUser,
+			Alamat:      item.Alamat,
 		}
 	}
 }
