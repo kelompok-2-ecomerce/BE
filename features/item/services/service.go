@@ -109,8 +109,18 @@ func (is *itemSrv) GetAllProducts() ([]item.Core, error) {
 }
 
 // MyPost implements item.ItemService
-func (*itemSrv) MyPost(token interface{}) ([]item.Core, error) {
-	panic("unimplemented")
+func (is *itemSrv) MyProducts(token interface{}) ([]item.Core, error) {
+	res, err := is.data.GetAllProducts()
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data tidak ditemukan"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return []item.Core{}, errors.New(msg)
+	}
+	return res, nil
 }
 
 // Update implements item.ItemService

@@ -74,8 +74,14 @@ func (*itemHandle) GetID() echo.HandlerFunc {
 }
 
 // MyPost implements item.ItemHandler
-func (*itemHandle) MyPost() echo.HandlerFunc {
-	panic("unimplemented")
+func (ih *itemHandle) MyProducts() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res, err := ih.srv.MyProducts(c.Get("user"))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list products", ListPostCoreToPostsRespon(res)))
+	}
 }
 
 // Update implements item.ItemHandler

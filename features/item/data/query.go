@@ -59,7 +59,7 @@ func (id *itemData) GetAllProducts() ([]item.Core, error) {
 	ORDER BY i.id DESC;
 	`).Scan(&res).Error
 	if err != nil {
-		log.Println("list book query error :", err.Error())
+		log.Println("list products query error :", err.Error())
 		return []item.Core{}, err
 	}
 
@@ -67,8 +67,23 @@ func (id *itemData) GetAllProducts() ([]item.Core, error) {
 }
 
 // MyPost implements item.ItemData
-func (*itemData) MyPost(userID int) ([]item.Core, error) {
-	panic("unimplemented")
+func (id *itemData) MyProducts(userID int) ([]item.Core, error) {
+	res := []Item{}
+
+	err := id.db.Raw(`
+	SELECT i.id , i.nama_barang , i.image_url , u.nama "NamaUser", u.alamat , i.deskripsi ,i.harga , i.stok 
+	FROM items i 
+	JOIN users u ON u.id = i.user_id
+	WHERE i.deleted_at IS NULL
+	AND u.id = ?
+	ORDER BY i.id DESC;
+	`, userID).Scan(&res).Error
+	if err != nil {
+		log.Println("list myproducts query error :", err.Error())
+		return []item.Core{}, err
+	}
+
+	return ToCoreArr(res), nil
 }
 
 // Update implements item.ItemData
@@ -81,14 +96,14 @@ func (pd *itemData) Update(userID int, itemID int, updatedData item.Core) (item.
 	// DB Update(value)
 	tx := pd.db.Where("id = ? AND user_id = ?", itemID, userID).Updates(&cnv)
 	if tx.Error != nil {
-		log.Println("update barang query error :", tx.Error)
+		log.Println("update product query error :", tx.Error)
 		return item.Core{}, tx.Error
 
 	}
 
 	// Rows affected checking
 	if tx.RowsAffected <= 0 {
-		log.Println("update book query error : data not found")
+		log.Println("update product query error : data not found")
 		return item.Core{}, errors.New("not found")
 	}
 
