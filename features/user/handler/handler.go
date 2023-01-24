@@ -20,17 +20,17 @@ func New(srv user.UserService) user.UserHandler {
 	}
 }
 
-func (uc *userControll) AllUser() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		result, err := uc.srv.AllUser()
-		if err != nil {
-			return c.JSON((helper.PrintErrorResponse(err.Error())))
-		}
+// func (uc *userControll) AllUser() echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		result, err := uc.srv.AllUser()
+// 		if err != nil {
+// 			return c.JSON((helper.PrintErrorResponse(err.Error())))
+// 		}
 
-		dataResp := fromCoreList(result)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil menampilkan data user", dataResp))
-	}
-}
+// 		dataResp := fromCoreList(result)
+// 		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil menampilkan data user", dataResp))
+// 	}
+// }
 
 func (uc *userControll) Login() echo.HandlerFunc {
 	return func(c echo.Context) error {

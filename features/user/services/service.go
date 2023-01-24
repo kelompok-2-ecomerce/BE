@@ -22,21 +22,21 @@ func New(ud user.UserData) user.UserService {
 	}
 }
 
-func (uuc *userUseCase) AllUser() ([]user.Core, error) {
-	data, err := uuc.qry.AllUser()
-	if err != nil {
-		msg := ""
-		if strings.Contains(err.Error(), "not found") {
-			msg = "user not found"
-		} else {
-			msg = "terdapat masalah pada server"
+// func (uuc *userUseCase) AllUser() ([]user.Core, error) {
+// 	data, err := uuc.qry.AllUser()
+// 	if err != nil {
+// 		msg := ""
+// 		if strings.Contains(err.Error(), "not found") {
+// 			msg = "user not found"
+// 		} else {
+// 			msg = "terdapat masalah pada server"
 
-		}
-		return nil, errors.New(msg)
+// 		}
+// 		return nil, errors.New(msg)
 
-	}
-	return data, nil
-}
+// 	}
+// 	return data, nil
+// }
 
 func (uuc *userUseCase) Login(email, password string) (string, user.Core, error) {
 	res, err := uuc.qry.Login(email)
@@ -71,7 +71,7 @@ func (uuc *userUseCase) Register(newUser user.Core) (user.Core, error) {
 		}
 		return user.Core{}, errors.New("validation error")
 	}
-	hashed, err := helper.GeneratePassword(newUser.Password)
+	hashed, _ := helper.GeneratePassword(newUser.Password)
 
 	if err != nil {
 		log.Println("bcrypt error ", err.Error())

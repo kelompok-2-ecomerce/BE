@@ -14,66 +14,72 @@ import (
 )
 
 func TestLogin(t *testing.T) {
-	repo := mocks.NewUserData(t)
-	t.Run("Berhasil Login", func(t *testing.T) {
-		inputEmail := "rischi@gmail.com"
-		hashed, _ := helper.GeneratePassword("rischi12345")
-		resData := user.Core{ID: uint(1), Nama: "rischi", Email: "rischi@gmail.com", Password: hashed}
+	repo := mocks.NewUserData(t) // mock data
 
-		repo.On("Login", inputEmail).Return(resData, nil)
+	t.Run("Berhasil login", func(t *testing.T) {
+		// input dan respond untuk mock data
+		inputEmail := "fajar@gmail.com"
+		// res dari data akan mengembalik password yang sudah di hash
+		hashed, _ := helper.GeneratePassword("be1422")
+		resData := user.Core{ID: uint(1), Nama: "fajar", Email: "fajar@gmail.com", Password: hashed}
+
+		repo.On("Login", inputEmail).Return(resData, nil).Once() // simulasi method login pada layer data
+
 		srv := New(repo)
-		token, res, err := srv.Login(inputEmail, "rischi12345")
+		token, res, err := srv.Login(inputEmail, "be1422")
 		assert.Nil(t, err)
 		assert.NotEmpty(t, token)
 		assert.Equal(t, resData.ID, res.ID)
 		repo.AssertExpectations(t)
 	})
 
-	t.Run("data tidak ditemukan", func(t *testing.T) {
-		inputEmail := "riau@gmail.com"
+	t.Run("Tidak ditemukan", func(t *testing.T) {
+		inputEmail := "putra@alterra.id"
+		repo.On("Login", inputEmail).Return(user.Core{}, errors.New("data not found")).Once()
 
-		repo.On("Login", inputEmail).Return(user.Core{}, errors.New("data not found"))
 		srv := New(repo)
-		token, res, err := srv.Login(inputEmail, "riau12345")
+		token, res, err := srv.Login(inputEmail, "be1422")
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "tidak ditemukan")
+		assert.ErrorContains(t, err, "data tidak ditemukan")
+		assert.Empty(t, token)
+		assert.Equal(t, uint(0), res.ID) ///expected value nilanya 0 , actual resid//apakah expected dan actual sama?
+		repo.AssertExpectations(t)
+	})
+	t.Run("server error", func(t *testing.T) {
+		inputEmail := "fajar@gmail.com"
+
+		repo.On("Login", inputEmail).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
+		srv := New(repo)
+		token, res, err := srv.Login(inputEmail, "be1422")
+
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "terdapat masalah pada server")
 		assert.Empty(t, token)
 		assert.Equal(t, uint(0), res.ID)
+		// assert.NotEqual(t, uint(0), res.ID)//hasilnya harus berbeda
 		repo.AssertExpectations(t)
 	})
 
-	t.Run("password tidak sesuai", func(t *testing.T) {
-		inputEmail := "rischi@gmail.com"
-		hashed, _ := helper.GeneratePassword("rischi12345")
-		resData := user.Core{ID: uint(1), Nama: "rischi", Email: "rischi@gmail.com", Password: hashed}
-
-		repo.On("Login", inputEmail).Return(resData, nil)
+	t.Run("Login error password doesnt match", func(t *testing.T) {
+		inputEmail := "fajar@gmail.com"
+		hashed, _ := helper.GeneratePassword("be1422")
+		resData := user.Core{ID: uint(1), Nama: "fajar", Email: "fajar@gmail.com", Password: hashed}
+		repo.On("Login", inputEmail).Return(resData, nil).Once()
 		srv := New(repo)
-		token, res, err := srv.Login(inputEmail, "rischi11111")
+		token, res, err := srv.Login(inputEmail, "asal")
+
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "password tidak sesuai")
 		assert.Empty(t, token)
 		assert.Equal(t, uint(0), res.ID)
 		repo.AssertExpectations(t)
 	})
-	t.Run("masalah di server", func(t *testing.T) {
-		repo.On("Profile", mock.Anything).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
-		srv := New(repo)
 
-		_, token := helper.GenerateJWT(1)
-		pToken := token.(*jwt.Token)
-		pToken.Valid = true
-		res, err := srv.Profile(pToken)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "server")
-		assert.Equal(t, uint(0), res.ID)
-		repo.AssertExpectations(t)
-	})
 }
 func TestProfile(t *testing.T) {
 	repo := mocks.NewUserData(t)
 	t.Run("Sukses lihat profile", func(t *testing.T) {
-		resData := user.Core{ID: uint(1), Nama: "rischi", Email: "rischi@gmail.com"}
+		resData := user.Core{ID: uint(1), Nama: "fajar", Email: "fajar@gmail.com"}
 		repo.On("Profile", uint(1)).Return(resData, nil).Once()
 		srv := New(repo)
 		_, token := helper.GenerateJWT(1)
@@ -84,20 +90,29 @@ func TestProfile(t *testing.T) {
 		assert.Equal(t, resData.ID, res.ID)
 		repo.AssertExpectations(t)
 	})
+	t.Run("jwt tidak valid", func(t *testing.T) {
+		srv := New(repo)
 
+		_, token := helper.GenerateJWT(1)
+
+		res, err := srv.Profile(token)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "tidak ditemukan")
+		assert.Equal(t, uint(0), res.ID)
+	})
 	t.Run("data tidak ditemukan", func(t *testing.T) {
-		repo.On("Profile", uint(1)).Return(user.Core{}, errors.New("data not found")).Once()
+		repo.On("Profile", uint(1)).Return(user.Core{}, errors.New("not found")).Once()
 		srv := New(repo)
 		_, token := helper.GenerateJWT(1)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 		res, err := srv.Profile(pToken)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "tidak ditemukan")
+		assert.ErrorContains(t, err, "data tidak ditemukan")
 		assert.Equal(t, uint(0), res.ID)
 		repo.AssertExpectations(t)
 	})
-	t.Run("masalah di server", func(t *testing.T) {
+	t.Run("terdapat masalah pada server", func(t *testing.T) {
 		repo.On("Profile", mock.Anything).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
 		srv := New(repo)
 
@@ -106,46 +121,18 @@ func TestProfile(t *testing.T) {
 		pToken.Valid = true
 		res, err := srv.Profile(pToken)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "server")
+		assert.ErrorContains(t, err, "terdapat masalah pada server")
 		assert.Equal(t, uint(0), res.ID)
 		repo.AssertExpectations(t)
 	})
 }
-func TestAllUser(t *testing.T) {
-	repo := mocks.NewUserData(t)
-	user := []user.Core{{
-		ID:    1,
-		Nama:  "Herdy",
-		Email: "herdy@gmail.com",
-	}}
-	t.Run("Sukses lihat data", func(t *testing.T) {
-		repo.On("AllUser", mock.Anything).Return(user, nil).Once()
 
-		srv := New(repo)
-		res, err := srv.AllUser()
-		assert.NoError(t, err)
-		assert.Equal(t, res, res)
-		repo.AssertExpectations(t)
-
-	})
-	t.Run("not found", func(t *testing.T) {
-		repo.On("AllUser").Return(nil, errors.New("not found")).Once()
-
-		srv := New(repo)
-
-		res, err := srv.AllUser()
-		assert.NoError(t, err)
-		assert.Equal(t, res, res)
-		repo.AssertExpectations(t)
-	})
-
-}
 func TestUpdate(t *testing.T) {
 	repo := mocks.NewUserData(t)
 
 	t.Run("sukses update data", func(t *testing.T) {
-		input := user.Core{Nama: "herdi", Email: "herdiladania11@gmail.com"}
-		updatedData := user.Core{ID: uint(1), Nama: "herdi", Email: "herdiladania11@gmail.com"}
+		input := user.Core{Nama: "fajar", Email: "fajar@gmail.com"}
+		updatedData := user.Core{ID: uint(1), Nama: "fajar", Email: "fajar@gmail.com"}
 		repo.On("Update", uint(1), input).Return(updatedData, nil).Once()
 
 		service := New(repo)
@@ -160,24 +147,9 @@ func TestUpdate(t *testing.T) {
 
 		repo.AssertExpectations(t)
 	})
-	t.Run("Input tidak sesuai format", func(t *testing.T) {
-		input := user.Core{
-			Email: "herdi",
-		}
-		repo.On("Update", uint(1), input).Return(user.Core{}, errors.New("input tidak sesuai")).Once()
 
-		service := New(repo)
-		_, token := helper.GenerateJWT(1)
-		pToken := token.(*jwt.Token)
-		pToken.Valid = true
-		res, err := service.Update(pToken, input)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "server")
-		assert.Equal(t, uint(0), res.ID)
-		repo.AssertExpectations(t)
-	})
 	t.Run("data tidak ditemukan", func(t *testing.T) {
-		input := user.Core{Nama: "herdi", Email: "herdiladania11@gmail.com"}
+		input := user.Core{Nama: "fajar", Email: "fajar@gmail.com"}
 		repo.On("Update", uint(5), input).Return(user.Core{}, errors.New("data not found")).Once()
 
 		service := New(repo)
@@ -186,13 +158,28 @@ func TestUpdate(t *testing.T) {
 		pToken.Valid = true
 		res, err := service.Update(pToken, input)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "tidak ditemukan")
+		assert.ErrorContains(t, err, "data tidak ditemukan")
 		assert.Equal(t, uint(0), res.ID)
 		repo.AssertExpectations(t)
 	})
+	t.Run("Input tidak sesuai format", func(t *testing.T) {
+		input := user.Core{
+			Email: "fajar",
+		}
+		repo.On("Update", uint(1), input).Return(user.Core{}, errors.New("not valid")).Once()
 
+		service := New(repo)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := service.Update(pToken, input)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "format tidak sesuai")
+		assert.Equal(t, uint(0), res.ID)
+		repo.AssertExpectations(t)
+	})
 	t.Run("masalah di server", func(t *testing.T) {
-		input := user.Core{Nama: "herdi", Email: "herdiladania11@gmail.com"}
+		input := user.Core{Nama: "fajar", Email: "fajar@gmail.com"}
 		repo.On("Update", uint(1), input).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
 
 		service := New(repo)
@@ -201,7 +188,7 @@ func TestUpdate(t *testing.T) {
 		pToken.Valid = true
 		res, err := service.Update(pToken, input)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "server")
+		assert.ErrorContains(t, err, "terdapat masalah pada server")
 		assert.Equal(t, uint(0), res.ID)
 		repo.AssertExpectations(t)
 	})
@@ -242,12 +229,12 @@ func TestDelete(t *testing.T) {
 		pToken.Valid = true
 		_, err := srv.Delete(pToken)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "tidak ditemukan")
+		assert.ErrorContains(t, err, "data tidak ditemukan")
 		repo.AssertExpectations(t)
 	})
 
 	t.Run("masalah di server", func(t *testing.T) {
-		repo.On("Delete", mock.Anything).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
+		repo.On("Delete", mock.Anything).Return(user.Core{}, errors.New("internal server error")).Once()
 		srv := New(repo)
 
 		_, token := helper.GenerateJWT(1)
@@ -255,10 +242,11 @@ func TestDelete(t *testing.T) {
 		pToken.Valid = true
 		_, err := srv.Delete(pToken)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "server")
+		assert.ErrorContains(t, err, "internal server error")
 		repo.AssertExpectations(t)
 	})
 }
+
 func TestRegister(t *testing.T) {
 	repo := mocks.NewUserData(t)
 
@@ -270,22 +258,19 @@ func TestRegister(t *testing.T) {
 
 		type SampleUsers struct {
 			ID       int
-			Name     string
+			Nama     string
 			Email    string
-			Username string
 			Password string
 		}
 		sample := SampleUsers{
 			ID:       1,
-			Name:     "reza",
-			Email:    "reza@gmail.com",
-			Username: "reza06",
+			Nama:     "fajar",
+			Email:    "fajar@gmail.com",
 			Password: "12345",
 		}
 		input := user.Core{
-			Nama:  sample.Name,
-			Email: sample.Email,
-
+			Nama:     sample.Nama,
+			Email:    sample.Email,
 			Password: sample.Password,
 		}
 
@@ -310,8 +295,8 @@ func TestRegister(t *testing.T) {
 	t.Run("Validation error", func(t *testing.T) {
 
 		user := user.Core{
-			Nama:  "Herdy",
-			Email: "herdy@gmail.com",
+			Nama:  "fajar",
+			Email: "fajar@gmail.com",
 		}
 
 		actual, err := srv.Register(user)
@@ -324,22 +309,20 @@ func TestRegister(t *testing.T) {
 	t.Run("Register error data duplicate", func(t *testing.T) {
 		type SampleUsers struct {
 			ID       int
-			Name     string
+			Nama     string
 			Email    string
 			Username string
 			Password string
 		}
 		sample := SampleUsers{
 			ID:       1,
-			Name:     "reza",
-			Email:    "reza@gmail.com",
-			Username: "reza06",
+			Nama:     "fajar",
+			Email:    "fajar@gmail.com",
 			Password: "12345",
 		}
 		input := user.Core{
-			Nama:  sample.Name,
-			Email: sample.Email,
-
+			Nama:     sample.Nama,
+			Email:    sample.Email,
 			Password: sample.Password,
 		}
 
@@ -358,26 +341,26 @@ func TestRegister(t *testing.T) {
 	t.Run("Masalah server", func(t *testing.T) {
 		type SampleUsers struct {
 			ID       int
-			Name     string
+			Nama     string
 			Email    string
 			Username string
 			Password string
 		}
 		sample := SampleUsers{
 			ID:       1,
-			Name:     "reza",
-			Email:    "reza@gmail.com",
-			Username: "reza06",
+			Nama:     "fajar",
+			Email:    "fajar@gmail.com",
 			Password: "12345",
 		}
 		input := user.Core{
-			Nama:     sample.Name,
-			Email:    sample.Email,
+			Nama:  sample.Nama,
+			Email: sample.Email,
+
 			Password: sample.Password,
 		}
 
 		// Programming input and return repo
-		repo.On("Register", mock.Anything).Return(user.Core{}, errors.New("internal server error")).Once()
+		repo.On("Register", mock.Anything).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
 
 		// Program service
 		data, err := srv.Register(input)
