@@ -86,6 +86,25 @@ func (id *itemData) MyProducts(userID int) ([]item.Core, error) {
 	return ToCoreArr(res), nil
 }
 
+func (id *itemData) GetProductByID(userID int, productID int) (item.Core, error) {
+	res := Item{}
+
+	err := id.db.Raw(`
+	SELECT i.id , i.nama_barang , i.image_url , u.nama "NamaUser", u.alamat , i.deskripsi ,i.harga , i.stok 
+	FROM items i 
+	JOIN users u ON u.id = i.user_id
+	WHERE i.deleted_at IS NULL
+	AND u.id = ?
+	AND i.id = ?
+	ORDER BY i.id DESC;
+	`, userID, productID).Scan(&res).Error
+	if err != nil {
+		log.Println("list myproducts query error :", err.Error())
+		return item.Core{}, err
+	}
+	return ToCore(res), nil
+}
+
 // Update implements item.ItemData
 func (pd *itemData) Update(userID int, itemID int, updatedData item.Core) (item.Core, error) {
 	cnv := CoreToData(updatedData)

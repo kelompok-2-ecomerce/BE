@@ -123,6 +123,24 @@ func (is *itemSrv) MyProducts(token interface{}) ([]item.Core, error) {
 	return res, nil
 }
 
+func (is *itemSrv) GetProductByID(token interface{}, productID int) (item.Core, error) {
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return item.Core{}, errors.New("user tidak ditemukan")
+	}
+	res, err := is.data.GetProductByID(userID, productID)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data tidak ditemukan"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return item.Core{}, errors.New(msg)
+	}
+	return res, nil
+}
+
 // Update implements item.ItemService
 func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core, file *multipart.FileHeader) (item.Core, error) {
 	userID := helper.ExtractToken(token)

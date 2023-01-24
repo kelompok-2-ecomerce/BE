@@ -69,8 +69,18 @@ func (ih *itemHandle) GetAllProducts() echo.HandlerFunc {
 }
 
 // GetID implements item.ItemHandler
-func (*itemHandle) GetID() echo.HandlerFunc {
-	panic("unimplemented")
+func (ih *itemHandle) GetProductByID() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ProductID, err := strconv.Atoi(c.Param("idProduct"))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		res, err := ih.srv.GetProductByID(c.Get("user"), ProductID)
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list myproducts", ToResponse("", res)))
+	}
 }
 
 // MyPost implements item.ItemHandler
@@ -80,7 +90,7 @@ func (ih *itemHandle) MyProducts() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list products", ListPostCoreToPostsRespon(res)))
+		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list myproducts", ListPostCoreToPostsRespon(res)))
 	}
 }
 
