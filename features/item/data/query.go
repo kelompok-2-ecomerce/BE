@@ -107,6 +107,17 @@ func (pd *itemData) Update(userID int, itemID int, updatedData item.Core) (item.
 }
 
 // GetID implements item.ItemData
-func (*itemData) GetID(ItemID int) (item.Core, error) {
-	panic("unimplemented")
+func (pd *itemData) GetID(ItemID int) (item.Core, error) {
+	var MyItem ItemUser
+	tx := pd.db.Raw("SELECT items.id, items.Nama_Barang, items.image_url, items.deskripsi, items.harga, items.stok, users.nama FROM items JOIN users ON users.id = items.user_id WHERE items.deleted_at IS NULL AND items.id = ?", ItemID).Find(&MyItem, ItemID)
+	if tx.Error != nil {
+		return item.Core{}, tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return item.Core{}, errors.New("id not found")
+
+	}
+	var dataCore = MyItem.ModelsToCore()
+
+	return dataCore, nil
 }

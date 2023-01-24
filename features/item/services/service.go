@@ -120,6 +120,19 @@ func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core) 
 }
 
 // GetID implements item.ItemService
-func (*itemSrv) GetID(ItemID int) (item.Core, error) {
-	panic("unimplemented")
+func (ps *itemSrv) GetID(ItemID int) (item.Core, error) {
+	data, err := ps.data.GetID(ItemID)
+
+	if err != nil {
+		fmt.Println(err)
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "ID Product not found"
+		} else {
+			msg = "internal server error"
+		}
+		return item.Core{}, errors.New(msg)
+	}
+	return data, nil
+
 }

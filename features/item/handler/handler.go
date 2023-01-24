@@ -79,13 +79,18 @@ func (ph *itemHandle) GetAllItems() echo.HandlerFunc {
 		result, _ := ph.srv.GetAllItems()
 
 		listRes := ListItemsCoreToItemsRespon(result)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses menampilkan  post", listRes))
+		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses menampilkan  Product", listRes))
 	}
 }
 
 // GetID implements item.ItemHandler
-func (*itemHandle) GetID() echo.HandlerFunc {
-	panic("unimplemented")
+func (ph *itemHandle) GetID() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ItemID, _ := strconv.Atoi(c.Param("id"))
+		res, _ := ph.srv.GetID(ItemID)
+		lisrest := ListItemsCoreToItemRespon(res)
+		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses menampilkan barang id", lisrest))
+	}
 }
 
 // MyPost implements item.ItemHandler
