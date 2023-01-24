@@ -30,6 +30,7 @@ type ItemService interface {
 	Add(token interface{}, newItem Core) (Core, error)
 	Update(token interface{}, itemID int, updatedData Core) (Core, error)
 	GetAllItems() ([]Core, error)
+	GetID(ItemID int) (Core, error)
 	Delete(token interface{}, itemID int) error
 	MyItem(token interface{}) ([]Core, error)
 }
@@ -38,6 +39,7 @@ type ItemData interface {
 	Add(userID int, newItem Core) (Core, error)
 	Update(userID int, itemID int, updatedData Core) (Core, error)
 	GetAllItems() ([]Core, error)
+	GetID(ItemID int) (Core, error)
 	Delete(userID int, itemID int) error
 	MyItem(userID int) ([]Core, error)
 }

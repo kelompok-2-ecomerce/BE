@@ -35,7 +35,7 @@ func (ps *itemSrv) Add(token interface{}, newItem item.Core) (item.Core, error) 
 		// fmt.Println(err)
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
-			msg = "Posting not found"
+			msg = "Items not found"
 		} else {
 			msg = "internal server error"
 		}
@@ -46,8 +46,24 @@ func (ps *itemSrv) Add(token interface{}, newItem item.Core) (item.Core, error) 
 }
 
 // Delete implements item.ItemService
-func (*itemSrv) Delete(token interface{}, itemID int) error {
-	panic("unimplemented")
+func (ps *itemSrv) Delete(token interface{}, itemID int) error {
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return errors.New("user not found")
+	}
+
+	err := ps.data.Delete(userID, itemID)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "item not found"
+		} else {
+			msg = "internal server error"
+
+		}
+		return errors.New(msg)
+	}
+	return nil
 }
 
 // GetAllPost implements item.ItemService
@@ -101,4 +117,9 @@ func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core) 
 	}
 
 	return res, nil
+}
+
+// GetID implements item.ItemService
+func (*itemSrv) GetID(ItemID int) (item.Core, error) {
+	panic("unimplemented")
 }

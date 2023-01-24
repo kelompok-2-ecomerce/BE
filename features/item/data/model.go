@@ -68,17 +68,3 @@ func ListModelTOCore(dataModel []ItemUser) []item.Core { //fungsi yang mengambil
 	}
 	return dataCore //  untuk menampilkan data ke controller
 }
-
-// func ToCoreSlice(data []posting.Core) []Image {
-// 	images := []Image{}
-// 	for _, v := range data {
-// 		image := Image{}
-// 		image.PostID = v.ID
-// 		image.Image_url = v.Image_url
-
-// 		images = append(images, image)
-// 	}
-
-// 	return images
-
-// }
