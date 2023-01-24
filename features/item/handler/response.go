@@ -58,7 +58,7 @@ func ToResponse(feature string, item item.Core) interface{} {
 	}
 }
 
-func ListPostCoreToPostRespon(dataCore item.Core) ItemResponse { // data user core yang ada di controller yang memanggil user repository
+func ListItemCoreToItemRespon(dataCore item.Core) ItemResponse { // data user core yang ada di controller yang memanggil user repository
 	return ItemResponse{
 		// ID:          dataCore.ID,
 		Nama_Barang: dataCore.Nama_Barang,
@@ -69,11 +69,11 @@ func ListPostCoreToPostRespon(dataCore item.Core) ItemResponse { // data user co
 		Nama_User:   dataCore.Nama,
 	}
 }
-func ListPostCoreToPostsRespon(dataCore []item.Core) []ItemResponse {
+func ListItemsCoreToItemsRespon(dataCore []item.Core) []ItemResponse {
 	var ResponData []ItemResponse
 
 	for _, value := range dataCore {
-		ResponData = append(ResponData, ListPostCoreToPostRespon(value))
+		ResponData = append(ResponData, ListItemCoreToItemRespon(value))
 	}
 	return ResponData
 }

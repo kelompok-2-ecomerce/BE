@@ -65,8 +65,13 @@ func (*itemHandle) Delete() echo.HandlerFunc {
 }
 
 // GetAllPost implements item.ItemHandler
-func (*itemHandle) GetAllPost() echo.HandlerFunc {
-	panic("unimplemented")
+func (ph *itemHandle) GetAllItems() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		result, _ := ph.srv.GetAllItems()
+
+		listRes := ListItemsCoreToItemsRespon(result)
+		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses menampilkan  post", listRes))
+	}
 }
 
 // GetID implements item.ItemHandler
@@ -80,7 +85,7 @@ func (ph *itemHandle) MyItem() echo.HandlerFunc {
 
 		res, _ := ph.srv.MyItem(c.Get("user"))
 
-		listRes := ListPostCoreToPostsRespon(res)
+		listRes := ListItemsCoreToItemsRespon(res)
 
 		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses menampilkan barangku", listRes))
 	}

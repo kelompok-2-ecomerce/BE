@@ -51,8 +51,19 @@ func (*itemSrv) Delete(token interface{}, itemID int) error {
 }
 
 // GetAllPost implements item.ItemService
-func (*itemSrv) GetAllPost() ([]item.Core, error) {
-	panic("unimplemented")
+func (ps *itemSrv) GetAllItems() ([]item.Core, error) {
+	All, err := ps.data.GetAllItems()
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "Products not found"
+		} else {
+			msg = "internal server error"
+		}
+		return nil, errors.New(msg)
+	}
+
+	return All, nil
 }
 
 // MyPost implements item.ItemService
