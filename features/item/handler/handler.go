@@ -60,8 +60,17 @@ func (ph *itemHandle) Add() echo.HandlerFunc {
 }
 
 // Delete implements item.ItemHandler
-func (*itemHandle) Delete() echo.HandlerFunc {
-	panic("unimplemented")
+func (ph *itemHandle) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ItemID, _ := strconv.Atoi(c.Param("id"))
+
+		del := ph.srv.Delete(c.Get("user"), ItemID)
+		if del != nil {
+			return c.JSON(helper.PrintErrorResponse(del.Error()))
+		}
+
+		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses menghapus barang"))
+	}
 }
 
 // GetAllPost implements item.ItemHandler
