@@ -4,6 +4,9 @@ import (
 	"log"
 	"projects/config"
 
+	cd "projects/features/cart/data"
+	chl "projects/features/cart/handler"
+	csrv "projects/features/cart/services"
 	id "projects/features/item/data"
 	ihl "projects/features/item/handler"
 	isrv "projects/features/item/services"
@@ -29,6 +32,10 @@ func main() {
 	itemsrv := isrv.New(itemData)
 	itemHdl := ihl.New(itemsrv)
 
+	cartData := cd.New(db)
+	cartsrv := csrv.New(cartData)
+	cartHdl := chl.New(cartsrv)
+
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -48,6 +55,8 @@ func main() {
 	e.GET("/myproducts", itemHdl.MyItem(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/products/:id", itemHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/:id", itemHdl.GetID())
+
+	e.POST("/carts", cartHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
 	}

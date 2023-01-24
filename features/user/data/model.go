@@ -1,7 +1,8 @@
 package data
 
 import (
-	"projects/features/item/data"
+	"projects/features/cart/data"
+	datas "projects/features/item/data"
 	"projects/features/user"
 
 	"gorm.io/gorm"
@@ -15,7 +16,8 @@ type User struct {
 	Foto     string
 	HP       string
 	Alamat   string
-	Items    []data.Item
+	Items    []datas.Item
+	Carts    []data.Cart
 }
 
 func ToCore(data User) user.Core {

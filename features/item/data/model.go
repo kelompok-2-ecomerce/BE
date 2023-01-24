@@ -1,6 +1,7 @@
 package data
 
 import (
+	carts "projects/features/cart/data"
 	"projects/features/item"
 	"time"
 
@@ -15,6 +16,7 @@ type Item struct {
 	Harga       float64
 	Stok        int
 	UserID      uint
+	Carts       []carts.Cart
 }
 
 type ItemUser struct {
