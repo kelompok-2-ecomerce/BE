@@ -5,6 +5,7 @@ import (
 
 	"log"
 
+	cart "projects/features/cart/data"
 	item "projects/features/item/data"
 	user "projects/features/user/data"
 
@@ -27,5 +28,6 @@ func InitDB(ac AppConfig) *gorm.DB {
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(user.User{})
 	db.AutoMigrate(item.Item{})
+	db.AutoMigrate(cart.Cart{})
 
 }
