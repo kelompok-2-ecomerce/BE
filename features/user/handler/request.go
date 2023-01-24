@@ -17,7 +17,7 @@ type UpdateRequest struct {
 	Nama     string `json:"name" form:"name"`
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
-	Alamat   string `json:"alamat" form:"alamat"`
+	Alamat   string `json:"address" form:"address"`
 	Foto     string `json:"photo" form:"photo"`
 	Hp       string `json:"phone_number" form:"phone_number"`
 }
