@@ -73,10 +73,10 @@ func (uuc *userUseCase) Register(newUser user.Core) (user.Core, error) {
 	}
 	hashed, _ := helper.GeneratePassword(newUser.Password)
 
-	if err != nil {
-		log.Println("bcrypt error ", err.Error())
-		return user.Core{}, errors.New("password process error")
-	}
+	// if err != nil {
+	// 	log.Println("bcrypt error ", err.Error())
+	// 	return user.Core{}, errors.New("password process error")
+	// }
 
 	newUser.Password = string(hashed)
 	res, err := uuc.qry.Register(newUser)
