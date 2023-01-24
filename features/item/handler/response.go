@@ -12,6 +12,15 @@ type ItemResponse struct {
 	Image_url   string  `json:"image"`
 	Nama_User   string  `json:"nama_user"`
 }
+type ItemResponses struct {
+	ID          uint    `json:"id"`
+	Nama_Barang string  `json:"nama_barang"`
+	Harga       float64 `json:"harga"`
+	Stok        int     `json:"stok"`
+	Deskripsi   string  `json:"deskripsi"`
+	Image_url   string  `json:"image"`
+	Nama_User   string  `json:"nama_user"`
+}
 type AddItemResponse struct {
 	Nama_Barang string  `json:"nama_barang"`
 	Harga       float64 `json:"harga"`
@@ -61,6 +70,17 @@ func ToResponse(feature string, item item.Core) interface{} {
 func ListItemCoreToItemRespon(dataCore item.Core) ItemResponse { // data user core yang ada di controller yang memanggil user repository
 	return ItemResponse{
 		// ID:          dataCore.ID,
+		Nama_Barang: dataCore.Nama_Barang,
+		Image_url:   dataCore.Image_url,
+		Harga:       dataCore.Harga,
+		Stok:        dataCore.Stok,
+		Deskripsi:   dataCore.Deskripsi,
+		Nama_User:   dataCore.Nama,
+	}
+}
+func ListItemsCoreToItemRespon(dataCore item.Core) ItemResponses { // data user core yang ada di controller yang memanggil user repository
+	return ItemResponses{
+		ID:          dataCore.ID,
 		Nama_Barang: dataCore.Nama_Barang,
 		Image_url:   dataCore.Image_url,
 		Harga:       dataCore.Harga,
