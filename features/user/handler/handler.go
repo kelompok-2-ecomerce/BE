@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"projects/features/user"
 	helper "projects/helper"
@@ -28,7 +26,7 @@ func (uc *userControll) AllUser() echo.HandlerFunc {
 		}
 
 		dataResp := fromCoreList(result)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil menampilkan data user", dataResp))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil menampilkan data user", dataResp))
 	}
 }
 
@@ -44,7 +42,7 @@ func (uc *userControll) Login() echo.HandlerFunc {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 		dataResp := ToResponses(res)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil login", dataResp, token))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("success login", dataResp, token))
 	}
 }
 func (uc *userControll) Register() echo.HandlerFunc {
@@ -54,12 +52,14 @@ func (uc *userControll) Register() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, "format inputan salah")
 		}
 
-		res, err := uc.srv.Register(*ToCore(input))
+		_, err := uc.srv.Register(*ToCore(input))
+		// res, err := uc.srv.Register(*ToCore(input))
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		dataResp := ToResponses(res)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusCreated, "berhasil mendaftar", dataResp))
+		// dataResp := ToResponses(res)
+		// return c.JSON(helper.PrintSuccessReponse(http.StatusCreated, "berhasil mendaftar", dataResp))
+		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("success add data"))
 	}
 }
 func (uc *userControll) Profile() echo.HandlerFunc {
@@ -71,7 +71,7 @@ func (uc *userControll) Profile() echo.HandlerFunc {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 		dataResp := ToResponse(res)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil lihat profil", dataResp))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("Berhasil menampilkan profil", dataResp))
 	}
 }
 
@@ -81,19 +81,12 @@ func (uc *userControll) Update() echo.HandlerFunc {
 		ex := c.Get("user")
 
 		input := UpdateRequest{}
-		file, errPath := c.FormFile("foto")
-
-		fmt.Print("error get path handler, err = ", errPath)
-
-		if file != nil {
-			res, err := helper.UploadImage(c)
-			// fmt.Println(res)
-			if err != nil {
-				fmt.Println(err)
-				return errors.New("create gambar failed cannot upload data")
-			}
-			input.Foto = res
-			// fmt.Println(input.Image_url)
+		//-----------
+		// Read file
+		//-----------
+		file, err := c.FormFile("image")
+		if err != nil {
+			file = nil
 		}
 
 		if err := c.Bind(&input); err != nil {
@@ -101,25 +94,29 @@ func (uc *userControll) Update() echo.HandlerFunc {
 		}
 		dataCore := *ToCore(input)
 
-		res, err := uc.srv.Update(ex, dataCore)
+		_, err = uc.srv.Update(ex, dataCore, file)
+		// res, err := uc.srv.Update(ex, dataCore, file)
 
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		dataResp := ToResponse(res)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusCreated, "berhasil mengubah data", dataResp))
+		// dataResp := ToResponse(res)
+		// return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil mengubah data", dataResp))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("update berhasil"))
 	}
 }
 
 func (uc *userControll) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tx := c.Get("user")
-		res, err := uc.srv.Delete(tx)
+		_, err := uc.srv.Delete(tx)
+		// res, err := uc.srv.Delete(tx)
 
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		result := ToResponse(res)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil hapus", result))
+		// result := ToResponse(res)
+		// return c.JSON(http.StatusOK, helper.PrintSuccessReponse("Delete user berhasil", result))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("Delete user berhasil"))
 	}
 }

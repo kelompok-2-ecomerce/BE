@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"projects/features/item"
@@ -26,19 +24,12 @@ func New(ps item.ItemService) item.ItemHandler {
 func (ph *itemHandle) Add() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := AddUpdatePostingRequest{}
-		file, errPath := c.FormFile("image")
-
-		fmt.Print("error get path handler, err = ", errPath)
-
-		if file != nil {
-			res, err := helper.UploadImage(c)
-			// fmt.Println(res)
-			if err != nil {
-				fmt.Println(err)
-				return errors.New("create gambar failed cannot upload data")
-			}
-			input.Image_url = res
-			// fmt.Println(input.Image_url)
+		//-----------
+		// Read file
+		//-----------
+		file, err := c.FormFile("image")
+		if err != nil {
+			file = nil
 		}
 
 		if err := c.Bind(&input); err != nil {
@@ -47,15 +38,17 @@ func (ph *itemHandle) Add() echo.HandlerFunc {
 
 		cnv := input.reqToCore()
 
-		res, err := ph.srv.Add(c.Get("user"), cnv)
+		_, err = ph.srv.Add(c.Get("user"), cnv, file)
+		// res, err := ph.srv.Add(c.Get("user"), cnv, file)
 		if err != nil {
 			log.Println("trouble :  ", err.Error())
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 
-		item := ToResponse("add", res)
+		// item := ToResponse("add", res)
 
-		return c.JSON(helper.PrintSuccessReponse(http.StatusCreated, "sukses menambahkan barang", item))
+		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("uccess add data"))
+		// return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("sukses menambahkan barang", item))
 	}
 }
 
@@ -83,19 +76,12 @@ func (*itemHandle) MyPost() echo.HandlerFunc {
 func (ph *itemHandle) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := AddUpdatePostingRequest{}
-		file, errPath := c.FormFile("file")
-
-		fmt.Print("error get path handler, err = ", errPath)
-
-		if file != nil {
-			res, err := helper.UploadImage(c)
-			// fmt.Println(res)
-			if err != nil {
-				fmt.Println(err)
-				return errors.New("create gambar failed cannot upload data")
-			}
-			input.Image_url = res
-			// fmt.Println(input.Image_url)
+		//-----------
+		// Read file
+		//-----------
+		file, err := c.FormFile("image")
+		if err != nil {
+			file = nil
 		}
 
 		if err := c.Bind(&input); err != nil {
@@ -108,14 +94,16 @@ func (ph *itemHandle) Update() echo.HandlerFunc {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 
-		res, err := ph.srv.Update(c.Get("user"), ItemID, *cnv)
+		_, err = ph.srv.Update(c.Get("user"), ItemID, *cnv, file)
+		// res, err := ph.srv.Update(c.Get("user"), ItemID, *cnv, file)
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 
-		item := ToResponse("update", res)
+		// item := ToResponse("update", res)
 
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "sukses mengubah barang", item))
+		// return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "update berhasil", item))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("update berhasil"))
 	}
 
 }

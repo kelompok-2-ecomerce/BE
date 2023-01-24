@@ -1,20 +1,20 @@
 package item
 
 import (
-	"time"
+	"mime/multipart"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Core struct {
 	ID          uint
-	Nama_Barang string `validate:"required"`
+	Nama_Barang string
 	Image_url   string
 	NamaUser    string
-	Deskripsi   string `validate:"required"`
+	Alamat      string
+	Deskripsi   string
 	Harga       float64
 	Stok        int
-	CreatedAt   time.Time
 }
 
 type ItemHandler interface {
@@ -27,8 +27,8 @@ type ItemHandler interface {
 }
 
 type ItemService interface {
-	Add(token interface{}, newItem Core) (Core, error)
-	Update(token interface{}, itemID int, updatedData Core) (Core, error)
+	Add(token interface{}, newItem Core, image *multipart.FileHeader) (Core, error)
+	Update(token interface{}, itemID int, updatedData Core, image *multipart.FileHeader) (Core, error)
 	GetAllPost() ([]Core, error)
 	Delete(token interface{}, itemID int) error
 	MyPost(token interface{}) ([]Core, error)

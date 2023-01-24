@@ -26,7 +26,7 @@ func (pd *itemData) Add(userID int, newItem item.Core) (item.Core, error) {
 
 	err := pd.db.Create(&cnv).Error
 	if err != nil {
-		log.Println("add post query error", err.Error())
+		log.Println("add item query error", err.Error())
 		msg := ""
 		if strings.Contains(err.Error(), "not valid") {
 			msg = "wrong input"

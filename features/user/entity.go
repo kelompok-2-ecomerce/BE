@@ -1,12 +1,16 @@
 package user
 
-import "github.com/labstack/echo/v4"
+import (
+	"mime/multipart"
+
+	"github.com/labstack/echo/v4"
+)
 
 type Core struct {
 	ID       uint
-	Nama     string `validate:"required"`
-	Email    string `validate:"required,email"`
-	Password string `validate:"required"`
+	Nama     string
+	Email    string
+	Password string
 	Foto     string
 	HP       string
 	Alamat   string
@@ -25,7 +29,7 @@ type UserService interface {
 	Login(email, password string) (string, Core, error)
 	Register(newUser Core) (Core, error)
 	Profile(token interface{}) (Core, error)
-	Update(token interface{}, updateData Core) (Core, error)
+	Update(token interface{}, updateData Core, image *multipart.FileHeader) (Core, error)
 	Delete(token interface{}) (Core, error)
 	AllUser() ([]Core, error)
 }
