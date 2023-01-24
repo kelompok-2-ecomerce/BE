@@ -43,8 +43,8 @@ func (uc *userControll) Login() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		dataResp := ToResponses(res)
-		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil login", dataResp, token))
+		dataResp := ToResponsesLogin(res, token)
+		return c.JSON(helper.PrintSuccessReponse(http.StatusOK, "berhasil login", dataResp))
 	}
 }
 func (uc *userControll) Register() echo.HandlerFunc {

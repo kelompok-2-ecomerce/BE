@@ -14,6 +14,11 @@ type RegisterResponse struct {
 	Nama  string `json:"nama"`
 	Email string `json:"email"`
 }
+type LoginResponse struct {
+	Nama  string `json:"nama"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
 
 func ToResponse(data user.Core) UserReponse {
 	return UserReponse{
@@ -30,6 +35,14 @@ func ToResponses(data user.Core) RegisterResponse {
 
 		Nama:  data.Nama,
 		Email: data.Email,
+	}
+}
+func ToResponsesLogin(data user.Core, token string) LoginResponse {
+	return LoginResponse{
+
+		Nama:  data.Nama,
+		Email: data.Email,
+		Token: token,
 	}
 }
 func fromCoreList(dataCore []user.Core) []UserReponse {

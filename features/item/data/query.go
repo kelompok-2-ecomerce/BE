@@ -48,8 +48,16 @@ func (*itemData) Delete(userID int, itemID int) error {
 }
 
 // GetAllPost implements item.ItemData
-func (*itemData) GetAllPost() ([]item.Core, error) {
-	panic("unimplemented")
+func (pd *itemData) GetAllItems() ([]item.Core, error) {
+	var MyItem []ItemUser
+	err := pd.db.Raw("SELECT items.id, items.Nama_Barang, items.image_url, items.deskripsi, items.harga, items.stok, users.nama FROM items JOIN users ON users.id = items.user_id WHERE items .deleted_at IS NULL").Find(&MyItem).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var dataCore = ListModelTOCore(MyItem)
+
+	return dataCore, nil
 }
 
 // MyPost implements item.ItemData

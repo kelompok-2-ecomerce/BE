@@ -20,7 +20,7 @@ type Core struct {
 type ItemHandler interface {
 	Add() echo.HandlerFunc
 	Update() echo.HandlerFunc
-	GetAllPost() echo.HandlerFunc
+	GetAllItems() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	MyItem() echo.HandlerFunc
 	GetID() echo.HandlerFunc
@@ -29,7 +29,7 @@ type ItemHandler interface {
 type ItemService interface {
 	Add(token interface{}, newItem Core) (Core, error)
 	Update(token interface{}, itemID int, updatedData Core) (Core, error)
-	GetAllPost() ([]Core, error)
+	GetAllItems() ([]Core, error)
 	Delete(token interface{}, itemID int) error
 	MyItem(token interface{}) ([]Core, error)
 }
@@ -37,7 +37,7 @@ type ItemService interface {
 type ItemData interface {
 	Add(userID int, newItem Core) (Core, error)
 	Update(userID int, itemID int, updatedData Core) (Core, error)
-	GetAllPost() ([]Core, error)
+	GetAllItems() ([]Core, error)
 	Delete(userID int, itemID int) error
 	MyItem(userID int) ([]Core, error)
 }
