@@ -47,6 +47,7 @@ func main() {
 	e.GET("/myproducts", itemHdl.GetAllProducts(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/products/:id", itemHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/:idProduct", itemHdl.GetProductByID(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.DELETE("/products/:idProduct", itemHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())

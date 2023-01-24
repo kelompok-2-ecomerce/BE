@@ -43,8 +43,21 @@ func (pd *itemData) Add(userID int, newItem item.Core) (item.Core, error) {
 }
 
 // Delete implements item.ItemData
-func (*itemData) Delete(userID int, itemID int) error {
-	panic("unimplemented")
+func (id *itemData) Delete(userID int, itemID int) error {
+	product := Item{
+		Model: gorm.Model{ID: uint(itemID)},
+	}
+	qry := id.db.Where("user_id = ?", userID).Delete(&product)
+	if qry.RowsAffected <= 0 {
+		log.Println("delete product query error : data not found")
+		return errors.New("not found")
+	}
+	err := qry.Error
+	if err != nil {
+		log.Println("delete product query error :", err.Error())
+		return err
+	}
+	return nil
 }
 
 // GetAllProducts implements item.ItemData
@@ -108,9 +121,6 @@ func (id *itemData) GetProductByID(userID int, productID int) (item.Core, error)
 // Update implements item.ItemData
 func (pd *itemData) Update(userID int, itemID int, updatedData item.Core) (item.Core, error) {
 	cnv := CoreToData(updatedData)
-	// if cnv.UserID != uint(userID) {
-	// 	log.Println("ini bukan barang anda")
-	// }
 
 	// DB Update(value)
 	tx := pd.db.Where("id = ? AND user_id = ?", itemID, userID).Updates(&cnv)

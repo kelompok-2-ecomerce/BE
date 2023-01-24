@@ -22,7 +22,7 @@ type ItemHandler interface {
 	Update() echo.HandlerFunc
 	GetAllProducts() echo.HandlerFunc
 	MyProducts() echo.HandlerFunc
-	// Delete() echo.HandlerFunc
+	Delete() echo.HandlerFunc
 	GetProductByID() echo.HandlerFunc
 }
 
@@ -32,7 +32,7 @@ type ItemService interface {
 	GetAllProducts() ([]Core, error)
 	MyProducts(token interface{}) ([]Core, error)
 	GetProductByID(token interface{}, productID int) (Core, error)
-	// Delete(token interface{}, itemID int) error
+	Delete(token interface{}, itemID int) error
 }
 
 type ItemData interface {
@@ -41,5 +41,5 @@ type ItemData interface {
 	GetAllProducts() ([]Core, error)
 	MyProducts(userID int) ([]Core, error)
 	GetProductByID(userID int, productID int) (Core, error)
-	// Delete(userID int, itemID int) error
+	Delete(userID int, itemID int) error
 }

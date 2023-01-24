@@ -89,8 +89,22 @@ func (ps *itemSrv) Add(token interface{}, newItem item.Core, file *multipart.Fil
 }
 
 // Delete implements item.ItemService
-func (*itemSrv) Delete(token interface{}, itemID int) error {
-	panic("unimplemented")
+func (is *itemSrv) Delete(token interface{}, itemID int) error {
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return errors.New("user tidak ditemukan")
+	}
+	err := is.data.Delete(userID, itemID)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "product tidak ditemukan"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return errors.New(msg)
+	}
+	return nil
 }
 
 // GetAllPost implements item.ItemService

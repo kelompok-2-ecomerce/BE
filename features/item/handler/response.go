@@ -68,6 +68,7 @@ func ListPostCoreToPostRespon(dataCore item.Core) ItemResponse { // data user co
 		Image_url:   dataCore.Image_url,
 		Harga:       dataCore.Harga,
 		Stok:        dataCore.Stok,
+		Alamat:      dataCore.Alamat,
 		Deskripsi:   dataCore.Deskripsi,
 		Nama_User:   dataCore.NamaUser,
 	}

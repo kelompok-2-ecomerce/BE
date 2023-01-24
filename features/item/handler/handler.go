@@ -53,8 +53,18 @@ func (ph *itemHandle) Add() echo.HandlerFunc {
 }
 
 // Delete implements item.ItemHandler
-func (*itemHandle) Delete() echo.HandlerFunc {
-	panic("unimplemented")
+func (ih *itemHandle) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ProductID, err := strconv.Atoi(c.Param("idProduct"))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		err = ih.srv.Delete(c.Get("user"), ProductID)
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("Berhasil delete product"))
+	}
 }
 
 // GetAllPost implements item.ItemHandler
@@ -64,7 +74,7 @@ func (ih *itemHandle) GetAllProducts() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list products", ListPostCoreToPostsRespon(res)))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil melihat list products", ListPostCoreToPostsRespon(res)))
 	}
 }
 
@@ -79,7 +89,7 @@ func (ih *itemHandle) GetProductByID() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list myproducts", ToResponse("", res)))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil melihat product by id", ToResponse("", res)))
 	}
 }
 
@@ -90,7 +100,7 @@ func (ih *itemHandle) MyProducts() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("berhasil melihat list myproducts", ListPostCoreToPostsRespon(res)))
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil melihat list myproducts", ListPostCoreToPostsRespon(res)))
 	}
 }
 
