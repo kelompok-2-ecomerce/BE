@@ -56,8 +56,15 @@ func (*itemSrv) GetAllPost() ([]item.Core, error) {
 }
 
 // MyPost implements item.ItemService
-func (*itemSrv) MyPost(token interface{}) ([]item.Core, error) {
-	panic("unimplemented")
+func (ps *itemSrv) MyItem(token interface{}) ([]item.Core, error) {
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return nil, errors.New("user not found")
+	}
+
+	res, _ := ps.data.MyItem(userID)
+
+	return res, nil
 }
 
 // Update implements item.ItemService

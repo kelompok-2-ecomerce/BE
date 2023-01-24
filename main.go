@@ -38,12 +38,13 @@ func main() {
 	e.POST("/register", userHdl.Register())
 	e.POST("/login", userHdl.Login())
 	e.GET("/users", userHdl.AllUser())
-	e.GET("/myprofile", userHdl.Profile(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/users", userHdl.Profile(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/users", userHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/users", userHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 
-	e.POST("/items", itemHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.PUT("/items/:id", itemHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.POST("/products", itemHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.PUT("/products/:id", itemHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/myproducts", itemHdl.MyItem(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())

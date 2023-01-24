@@ -21,10 +21,10 @@ type ItemUser struct {
 	ID          uint
 	Nama_Barang string
 	Image_url   string
-	NamaUser    string
+	Nama        string
 	Deskripsi   string
 	Harga       float64
-	stok        int
+	Stok        int
 	CreatedAt   time.Time
 }
 
@@ -51,8 +51,13 @@ func ToCore(data Item) item.Core {
 
 func (dataModel *ItemUser) ModelsToCore() item.Core { //fungsi yang mengambil data dari  user gorm(model.go)  dan merubah data ke entities usercore
 	return item.Core{
-		ID:        dataModel.ID,
-		Image_url: dataModel.Image_url,
+		ID:          dataModel.ID,
+		Nama_Barang: dataModel.Nama_Barang,
+		Image_url:   dataModel.Image_url,
+		Deskripsi:   dataModel.Deskripsi,
+		Harga:       dataModel.Harga,
+		Stok:        dataModel.Stok,
+		Nama:        dataModel.Nama,
 	}
 }
 

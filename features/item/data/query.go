@@ -53,8 +53,16 @@ func (*itemData) GetAllPost() ([]item.Core, error) {
 }
 
 // MyPost implements item.ItemData
-func (*itemData) MyPost(userID int) ([]item.Core, error) {
-	panic("unimplemented")
+func (pd *itemData) MyItem(userID int) ([]item.Core, error) {
+	var MyItem []ItemUser
+	err := pd.db.Raw("SELECT items.id, items.Nama_Barang, items.image_url, items.deskripsi, items.harga, items.stok, users.nama FROM items JOIN users ON users.id = items.user_id WHERE items.user_id = ?", userID).Find(&MyItem).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var dataCore = ListModelTOCore(MyItem)
+
+	return dataCore, nil
 }
 
 // Update implements item.ItemData

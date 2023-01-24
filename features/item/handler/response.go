@@ -5,7 +5,6 @@ import (
 )
 
 type ItemResponse struct {
-	ID          uint    `json:"id"`
 	Nama_Barang string  `json:"nama_barang"`
 	Harga       float64 `json:"harga"`
 	Stok        int     `json:"stok"`
@@ -48,26 +47,26 @@ func ToResponse(feature string, item item.Core) interface{} {
 		}
 	default:
 		return ItemResponse{
-			ID:          item.ID,
+
 			Nama_Barang: item.Nama_Barang,
 			Harga:       item.Harga,
 			Stok:        item.Stok,
 			Deskripsi:   item.Deskripsi,
 			Image_url:   item.Image_url,
-			Nama_User:   item.NamaUser,
+			Nama_User:   item.Nama,
 		}
 	}
 }
 
 func ListPostCoreToPostRespon(dataCore item.Core) ItemResponse { // data user core yang ada di controller yang memanggil user repository
 	return ItemResponse{
-		ID:          dataCore.ID,
+		// ID:          dataCore.ID,
 		Nama_Barang: dataCore.Nama_Barang,
 		Image_url:   dataCore.Image_url,
 		Harga:       dataCore.Harga,
 		Stok:        dataCore.Stok,
 		Deskripsi:   dataCore.Deskripsi,
-		Nama_User:   dataCore.NamaUser,
+		Nama_User:   dataCore.Nama,
 	}
 }
 func ListPostCoreToPostsRespon(dataCore []item.Core) []ItemResponse {

@@ -10,7 +10,7 @@ type Core struct {
 	ID          uint
 	Nama_Barang string `validate:"required"`
 	Image_url   string
-	NamaUser    string
+	Nama        string
 	Deskripsi   string `validate:"required"`
 	Harga       float64
 	Stok        int
@@ -22,7 +22,7 @@ type ItemHandler interface {
 	Update() echo.HandlerFunc
 	GetAllPost() echo.HandlerFunc
 	Delete() echo.HandlerFunc
-	MyPost() echo.HandlerFunc
+	MyItem() echo.HandlerFunc
 	GetID() echo.HandlerFunc
 }
 
@@ -31,7 +31,7 @@ type ItemService interface {
 	Update(token interface{}, itemID int, updatedData Core) (Core, error)
 	GetAllPost() ([]Core, error)
 	Delete(token interface{}, itemID int) error
-	MyPost(token interface{}) ([]Core, error)
+	MyItem(token interface{}) ([]Core, error)
 }
 
 type ItemData interface {
@@ -39,5 +39,5 @@ type ItemData interface {
 	Update(userID int, itemID int, updatedData Core) (Core, error)
 	GetAllPost() ([]Core, error)
 	Delete(userID int, itemID int) error
-	MyPost(userID int) ([]Core, error)
+	MyItem(userID int) ([]Core, error)
 }
