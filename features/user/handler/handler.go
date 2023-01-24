@@ -42,7 +42,8 @@ func (uc *userControll) Login() echo.HandlerFunc {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 		dataResp := ToResponses(res)
-		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("success login", dataResp, token))
+		dataResp.Token = token
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("success login", dataResp))
 	}
 }
 func (uc *userControll) Register() echo.HandlerFunc {

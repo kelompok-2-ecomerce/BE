@@ -21,7 +21,6 @@ func PrintSuccessReponse(message string, data ...interface{}) interface{} {
 		if data[0] != "" {
 			resp["data"] = data[0]
 		}
-		resp["token"] = data[1].(string)
 	}
 
 	return resp
