@@ -89,7 +89,7 @@ func (id *itemData) MyProducts(userID int) ([]item.Core, error) {
 	JOIN users u ON u.id = i.user_id
 	WHERE i.deleted_at IS NULL
 	AND u.id = ?
-	ORDER BY i.id DESC;
+	ORDER BY i.updated_at;
 	`, userID).Scan(&res).Error
 	if err != nil {
 		log.Println("list myproducts query error :", err.Error())

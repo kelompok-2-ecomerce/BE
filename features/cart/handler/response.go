@@ -1,6 +1,8 @@
 package handler
 
-import "projects/features/cart"
+import (
+	"projects/features/cart"
+)
 
 type CartProductRes struct {
 	ItemID      uint    `json:"product_id"`
@@ -28,5 +30,6 @@ func ToCartProductResArr(data []cart.Core) []CartProductRes {
 		tmp := ToCartProductRes(v)
 		arrRes = append(arrRes, tmp)
 	}
+
 	return arrRes
 }

@@ -43,6 +43,7 @@ func ToCore(data Cart) cart.Core {
 		Price:       data.Price,
 		Qty:         data.Qty,
 		Total:       data.Total,
+		ItemID:      data.ItemID,
 	}
 }
 

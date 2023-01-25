@@ -15,13 +15,13 @@ type Core struct {
 type CartHandler interface {
 	Add() echo.HandlerFunc
 	GetMyCart() echo.HandlerFunc
-	// UpdateProductCart() echo.HandlerFunc
+	UpdateProductCart() echo.HandlerFunc
 }
 
 type CartService interface {
 	Add(token interface{}, productId uint, qty int) (Core, error)
 	GetMyCart(token interface{}) ([]Core, error)
-	// UpdateProductCart(token interface{}, productId uint, qty int) error
+	UpdateProductCart(token interface{}, productId uint, qty int) error
 }
 
 type CartData interface {

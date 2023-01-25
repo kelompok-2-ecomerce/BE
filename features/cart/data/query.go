@@ -114,7 +114,8 @@ func (cd *cartData) GetMyCart(userID int) ([]cart.Core, error) {
 	FROM items i 
 	JOIN cart_items ci ON ci.item_id = i.id 
 	WHERE ci.cart_id = ?
-	GROUP BY ci.cart_id , ci.item_id ;
+	GROUP BY ci.cart_id , ci.item_id
+	ORDER BY i.updated_at;
 	`, newCart.ID).Scan(&listProduct).Error
 	if err != nil {
 		log.Println("list cart product query error :", err.Error())
@@ -155,9 +156,10 @@ func (cd *cartData) UpdateProductCart(userID int, productId uint, qty int) error
 	QtyCurrent := cd.CartProductExits(userID, productId)
 	if qty > QtyCurrent {
 		QtyOnGoing := qty - QtyCurrent
+		log.Println(QtyOnGoing)
 		// check stok product and decrease if enough stock
 		if cd.CheckStock(productId, QtyOnGoing) == 0 {
-			return errors.New("not enough stock")
+			return errors.New("not enough stock on update product cart")
 		}
 	} else {
 		// increase stock product
