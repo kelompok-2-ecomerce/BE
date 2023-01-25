@@ -3,9 +3,12 @@ package services
 import (
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"projects/features/item"
 	"projects/helper"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -23,21 +26,61 @@ func New(pd item.ItemData) item.ItemService {
 }
 
 // Add implements item.ItemService
-func (ps *itemSrv) Add(token interface{}, newItem item.Core) (item.Core, error) {
+func (ps *itemSrv) Add(token interface{}, newItem item.Core, file *multipart.FileHeader) (item.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		return item.Core{}, errors.New("user not found")
+		return item.Core{}, errors.New("user tidak ditemukan")
+	}
+
+	if file != nil {
+		src, err := file.Open()
+		if err != nil {
+			return item.Core{}, errors.New("format input file tidak dapat dibuka")
+		}
+		err = helper.CheckFileSize(file.Size)
+		if err != nil {
+			idx := strings.Index(err.Error(), ",")
+			msg := err.Error()
+			return item.Core{}, errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
+		}
+		extension, err := helper.CheckFileExtension(file.Filename)
+		if err != nil {
+			return item.Core{}, errors.New("format input file type tidak diizinkan")
+		}
+		filename := "images/product/" + strconv.FormatInt(time.Now().Unix(), 10) + "." + extension
+
+		photo, err := helper.UploadImageToS3(filename, src)
+		if err != nil {
+			return item.Core{}, errors.New("format input file type tidak dapat diupload")
+		}
+
+		newItem.Image_url = photo
+
+		defer src.Close()
+	}
+
+	err := helper.Validasi(helper.ToItemName(newItem))
+	if err != nil {
+		return item.Core{}, err
+	}
+
+	err = helper.Validasi(helper.ToItemStok(newItem))
+	if err != nil {
+		return item.Core{}, err
+	}
+
+	err = helper.Validasi(helper.ToItemHarga(newItem))
+	if err != nil {
+		return item.Core{}, err
 	}
 
 	res, err := ps.data.Add(userID, newItem)
-	fmt.Println(res)
 	if err != nil {
-		// fmt.Println(err)
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
-			msg = "Items not found"
+			msg = "item not found"
 		} else {
-			msg = "internal server error"
+			msg = "terjadi kesalahan pada server"
 		}
 		return item.Core{}, errors.New(msg)
 	}
@@ -46,20 +89,18 @@ func (ps *itemSrv) Add(token interface{}, newItem item.Core) (item.Core, error) 
 }
 
 // Delete implements item.ItemService
-func (ps *itemSrv) Delete(token interface{}, itemID int) error {
+func (is *itemSrv) Delete(token interface{}, itemID int) error {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		return errors.New("user not found")
+		return errors.New("user tidak ditemukan")
 	}
-
-	err := ps.data.Delete(userID, itemID)
+	err := is.data.Delete(userID, itemID)
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
-			msg = "item not found"
+			msg = "product tidak ditemukan"
 		} else {
-			msg = "internal server error"
-
+			msg = "terjadi kesalahan pada server"
 		}
 		return errors.New(msg)
 	}
@@ -67,41 +108,105 @@ func (ps *itemSrv) Delete(token interface{}, itemID int) error {
 }
 
 // GetAllPost implements item.ItemService
-func (ps *itemSrv) GetAllItems() ([]item.Core, error) {
-	All, err := ps.data.GetAllItems()
+func (is *itemSrv) GetAllProducts() ([]item.Core, error) {
+	res, err := is.data.GetAllProducts()
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
-			msg = "Products not found"
+			msg = "data tidak ditemukan"
 		} else {
-			msg = "internal server error"
+			msg = "terjadi kesalahan pada server"
 		}
-		return nil, errors.New(msg)
+		return []item.Core{}, errors.New(msg)
 	}
-
-	return All, nil
+	return res, nil
 }
 
 // MyPost implements item.ItemService
-func (ps *itemSrv) MyItem(token interface{}) ([]item.Core, error) {
+func (is *itemSrv) MyProducts(token interface{}) ([]item.Core, error) {
+	res, err := is.data.GetAllProducts()
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data tidak ditemukan"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return []item.Core{}, errors.New(msg)
+	}
+	return res, nil
+}
+
+func (is *itemSrv) GetProductByID(token interface{}, productID int) (item.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		return nil, errors.New("user not found")
+		return item.Core{}, errors.New("user tidak ditemukan")
 	}
-
-	res, _ := ps.data.MyItem(userID)
-
+	res, err := is.data.GetProductByID(userID, productID)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data tidak ditemukan"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return item.Core{}, errors.New(msg)
+	}
 	return res, nil
 }
 
 // Update implements item.ItemService
-func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core) (item.Core, error) {
+func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core, file *multipart.FileHeader) (item.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
 		return item.Core{}, errors.New("id user not found")
 	}
-	if validasieror := ps.validasi.Struct(updatedData); validasieror != nil {
-		return item.Core{}, nil
+	if file != nil {
+		src, err := file.Open()
+		if err != nil {
+			return item.Core{}, errors.New("format input file tidak dapat dibuka")
+		}
+		err = helper.CheckFileSize(file.Size)
+		if err != nil {
+			idx := strings.Index(err.Error(), ",")
+			msg := err.Error()
+			return item.Core{}, errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
+		}
+		extension, err := helper.CheckFileExtension(file.Filename)
+		if err != nil {
+			return item.Core{}, errors.New("format input file type tidak diizinkan")
+		}
+		filename := "images/product/" + strconv.FormatInt(time.Now().Unix(), 10) + "." + extension
+
+		photo, err := helper.UploadImageToS3(filename, src)
+		if err != nil {
+			return item.Core{}, errors.New("format input file type tidak dapat diupload")
+		}
+
+		updatedData.Image_url = photo
+
+		defer src.Close()
+	}
+
+	if len(updatedData.Nama_Barang) > 0 {
+		err := helper.Validasi(helper.ToItemName(updatedData))
+		if err != nil {
+			return item.Core{}, err
+		}
+	}
+
+	if updatedData.Stok > 0 {
+		err := helper.Validasi(helper.ToItemStok(updatedData))
+		if err != nil {
+			return item.Core{}, err
+		}
+	}
+
+	if updatedData.Harga > 0 {
+		err := helper.Validasi(helper.ToItemHarga(updatedData))
+		if err != nil {
+			return item.Core{}, err
+		}
 	}
 
 	res, err := ps.data.Update(userID, itemID, updatedData)
@@ -117,22 +222,4 @@ func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core) 
 	}
 
 	return res, nil
-}
-
-// GetID implements item.ItemService
-func (ps *itemSrv) GetID(ItemID int) (item.Core, error) {
-	data, err := ps.data.GetID(ItemID)
-
-	if err != nil {
-		fmt.Println(err)
-		msg := ""
-		if strings.Contains(err.Error(), "not found") {
-			msg = "ID Product not found"
-		} else {
-			msg = "internal server error"
-		}
-		return item.Core{}, errors.New(msg)
-	}
-	return data, nil
-
 }

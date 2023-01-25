@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"projects/features/cart"
 	"projects/helper"
@@ -11,45 +10,40 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type cartSrv struct {
-	data     cart.CartData
-	validasi *validator.Validate
+type cartUseCase struct {
+	qry cart.CartData
+	vld *validator.Validate
 }
 
-func New(cd cart.CartData) cart.CartService {
-	return &cartSrv{
-		data:     cd,
-		validasi: validator.New(),
+func New(ud cart.CartData) cart.CartService {
+	return &cartUseCase{
+		qry: ud,
+		vld: validator.New(),
 	}
 }
 
-// Add implements cart.CartService
-func (cs *cartSrv) Add(token interface{}, newCart cart.Core) (cart.Core, error) {
+func (cuc *cartUseCase) Add(token interface{}, productId uint, qty int) (cart.Core, error) {
+	err := helper.Validasi(helper.ToQtyInt(qty))
+	if err != nil {
+		return cart.Core{}, err
+	}
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		return cart.Core{}, errors.New("user not found")
+		return cart.Core{}, errors.New("user tidak ditemukan")
 	}
 
-	err := cs.validasi.Struct(newCart)
+	res, err := cuc.qry.Add(userID, productId, qty)
 	if err != nil {
-		if _, ok := err.(*validator.InvalidValidationError); ok {
-			log.Println(err)
-		}
-		return cart.Core{}, errors.New("validation error")
-	}
-
-	res, err := cs.data.Add(userID, newCart)
-	fmt.Println(res)
-	if err != nil {
-		// fmt.Println(err)
+		log.Println(err)
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
-			msg = "Cart not found"
+			msg = "data tidak ditemukan"
+		} else if strings.Contains(err.Error(), "stock") {
+			msg = "stok tidak cukup"
 		} else {
-			msg = "internal server error"
+			msg = "terjadi kesalahan pada server"
 		}
 		return cart.Core{}, errors.New(msg)
 	}
-
 	return res, nil
 }

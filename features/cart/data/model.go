@@ -2,47 +2,62 @@ package data
 
 import (
 	"projects/features/cart"
-	"time"
 
 	"gorm.io/gorm"
 )
 
 type Cart struct {
 	gorm.Model
-	Qty    string
-	ItemID uint
-	UserID uint
+	IsOrdered   bool `gorm:"default:false"`
+	ProductName string
+	ImageUrl    string
+	Price       float64
+	Qty         int
+	Items       []Item `gorm:"many2many:cart_items;"`
+	UserID      uint
+	ItemID      uint
 }
 
-type CartUser struct {
-	ID          uint
-	Nama_Barang string
-	Qty         string
-	Nama        string
-	CreatedAt   time.Time
+type CartItem struct {
+	CartID    uint
+	ItemID    uint
+	Qty       int
+	DeletedAt gorm.DeletedAt
+}
+
+type User struct {
+	gorm.Model
+	Carts []Cart
+}
+
+type Item struct {
+	gorm.Model
+}
+
+func ToCore(data Cart) cart.Core {
+	return cart.Core{
+		ID:          data.ID,
+		ProductName: data.ProductName,
+		ImageUrl:    data.ImageUrl,
+		Price:       data.Price,
+		Qty:         data.Qty,
+	}
 }
 
 func CoreToData(data cart.Core) Cart {
 	return Cart{
-		Model:  gorm.Model{ID: data.ID},
-		Qty:    data.Qty,
-		ItemID: data.ItemID,
+		ProductName: data.ProductName,
+		ImageUrl:    data.ImageUrl,
+		Price:       data.Price,
+		Qty:         data.Qty,
 	}
 }
 
-func (dataModel *CartUser) ModelsToCore() cart.Core { //fungsi yang mengambil data dari  user gorm(model.go)  dan merubah data ke entities usercore
-	return cart.Core{
-		ID:          dataModel.ID,
-		Nama_Barang: dataModel.Nama_Barang,
-		Qty:         dataModel.Qty,
-		Nama:        dataModel.Nama,
+func ToCoreArr(data []Cart) []cart.Core {
+	arrRes := []cart.Core{}
+	for _, v := range data {
+		tmp := ToCore(v)
+		arrRes = append(arrRes, tmp)
 	}
-}
-
-func ListModelTOCore(dataModel []CartUser) []cart.Core { //fungsi yang mengambil data dari  user gorm(model.go)  dan merubah data ke entities usercore
-	var dataCore []cart.Core
-	for _, value := range dataModel {
-		dataCore = append(dataCore, value.ModelsToCore())
-	}
-	return dataCore //  untuk menampilkan data ke controller
+	return arrRes
 }
