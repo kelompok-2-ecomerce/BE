@@ -60,6 +60,7 @@ func main() {
 	e.POST("/carts/:idProduct", cartHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/carts", cartHdl.GetMyCart(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/carts/:idProduct", cartHdl.UpdateProductCart(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.DELETE("/carts/:idProduct", cartHdl.DeleteProductCart(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())

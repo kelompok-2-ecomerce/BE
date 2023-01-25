@@ -16,16 +16,19 @@ type CartHandler interface {
 	Add() echo.HandlerFunc
 	GetMyCart() echo.HandlerFunc
 	UpdateProductCart() echo.HandlerFunc
+	DeleteProductCart() echo.HandlerFunc
 }
 
 type CartService interface {
 	Add(token interface{}, productId uint, qty int) (Core, error)
 	GetMyCart(token interface{}) ([]Core, error)
 	UpdateProductCart(token interface{}, productId uint, qty int) error
+	DeleteProductCart(token interface{}, productId uint) error
 }
 
 type CartData interface {
 	Add(userID int, productId uint, qty int) (Core, error)
 	GetMyCart(userID int) ([]Core, error)
 	UpdateProductCart(userID int, productId uint, qty int) error
+	DeleteProductCart(userID int, productId uint) error
 }

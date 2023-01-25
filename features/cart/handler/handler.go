@@ -64,3 +64,17 @@ func (ch *cartHandle) UpdateProductCart() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("update berhasil"))
 	}
 }
+
+func (ch *cartHandle) DeleteProductCart() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		productID, err := strconv.Atoi(c.Param("idProduct"))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		err = ch.srv.DeleteProductCart(c.Get("user"), uint(productID))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("Delete product berhasil"))
+	}
+}
