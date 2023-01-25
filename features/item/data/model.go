@@ -20,7 +20,7 @@ type Item struct {
 
 type User struct {
 	gorm.Model
-	Comment []Item
+	Products []Item
 }
 
 func CoreToData(data item.Core) Item {

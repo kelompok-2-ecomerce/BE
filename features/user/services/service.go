@@ -53,7 +53,7 @@ func (uuc *userUseCase) Login(email, password string) (string, user.Core, error)
 		log.Println("query login error", err.Error())
 		msg := ""
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "no rows") {
-			msg = "email/username belum terdaftar"
+			msg = "email belum terdaftar"
 		} else {
 			msg = "terdapat masalah pada server"
 		}

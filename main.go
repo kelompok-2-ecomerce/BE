@@ -11,6 +11,10 @@ import (
 	"projects/features/user/handler"
 	"projects/features/user/services"
 
+	cd "projects/features/cart/data"
+	chl "projects/features/cart/handler"
+	csrv "projects/features/cart/services"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -28,6 +32,10 @@ func main() {
 	itemData := id.New(db)
 	itemsrv := isrv.New(itemData)
 	itemHdl := ihl.New(itemsrv)
+
+	cartData := cd.New(db)
+	cartsrv := csrv.New(cartData)
+	cartHdl := chl.New(cartsrv)
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
@@ -48,6 +56,8 @@ func main() {
 	e.PUT("/products/:id", itemHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/:idProduct", itemHdl.GetProductByID(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/products/:idProduct", itemHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
+
+	e.POST("/carts/:idProduct", cartHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())

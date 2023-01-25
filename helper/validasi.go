@@ -3,6 +3,7 @@ package helper
 import (
 	"errors"
 	"log"
+	"projects/features/cart"
 	"projects/features/item"
 	"projects/features/user"
 	"strings"
@@ -34,6 +35,21 @@ type ItemStokValidate struct {
 }
 type ItemHargaValidate struct {
 	Harga float64 `validate:"required"`
+}
+
+type QtyValidate struct {
+	Qty int `validate:"required,numeric"`
+}
+
+func ToQtyInt(data int) QtyValidate {
+	return QtyValidate{
+		Qty: data,
+	}
+}
+func ToQty(data cart.Core) QtyValidate {
+	return QtyValidate{
+		Qty: data.Qty,
+	}
 }
 
 func ToRegister(data user.Core) RegisterValidate {
