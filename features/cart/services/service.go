@@ -69,3 +69,24 @@ func (cuc *cartUseCase) GetMyCart(token interface{}) ([]cart.Core, error) {
 
 	return res, nil
 }
+
+func (cuc *cartUseCase) UpdateProductCart(token interface{}, productId uint, qty int) error {
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return errors.New("user tidak ditemukan")
+	}
+	err := cuc.qry.UpdateProductCart(userID, productId, qty)
+	if err != nil {
+		log.Println(err)
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data tidak ditemukan"
+		} else if strings.Contains(err.Error(), "stock") {
+			msg = "stok tidak cukup"
+		} else {
+			msg = "terjadi kesalahan pada server"
+		}
+		return errors.New(msg)
+	}
+	return nil
+}

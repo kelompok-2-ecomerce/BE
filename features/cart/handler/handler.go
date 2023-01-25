@@ -25,11 +25,11 @@ func (ch *cartHandle) Add() echo.HandlerFunc {
 		if err := c.Bind(&input); err != nil {
 			return c.JSON(http.StatusBadRequest, "format inputan salah")
 		}
-		ProductID, err := strconv.Atoi(c.Param("idProduct"))
+		productID, err := strconv.Atoi(c.Param("idProduct"))
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		_, err = ch.srv.Add(c.Get("user"), uint(ProductID), ToCore(input).Qty)
+		_, err = ch.srv.Add(c.Get("user"), uint(productID), ToCore(input).Qty)
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
@@ -44,5 +44,23 @@ func (ch *cartHandle) GetMyCart() echo.HandlerFunc {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil melihat list products dari keranjang", ToCartProductResArr(res)))
+	}
+}
+
+func (ch *cartHandle) UpdateProductCart() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		input := AddCartReq{}
+		if err := c.Bind(&input); err != nil {
+			return c.JSON(http.StatusBadRequest, "format inputan salah")
+		}
+		productID, err := strconv.Atoi(c.Param("idProduct"))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		err = ch.srv.UpdateProductCart(c.Get("user"), uint(productID), ToCore(input).Qty)
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("update berhasil"))
 	}
 }
