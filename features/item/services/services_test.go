@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"projects/features/item"
+
 	"projects/helper"
 	"projects/mocks"
 	"testing"
@@ -205,7 +206,7 @@ func TestMyItems(t *testing.T) {
 	srv := New(data)
 
 	// Case: user ingin melihat list buku yang dimilikinya
-	t.Run("Post succesfully", func(t *testing.T) {
+	t.Run("item succesfully", func(t *testing.T) {
 		resData := []item.Core{
 			{
 				ID:          1,
@@ -258,7 +259,86 @@ func TestMyItems(t *testing.T) {
 		assert.Equal(t, uint(0), res) //perba
 	})
 }
+func TestUpdateItem(t *testing.T) {
 
+	data := mocks.NewItemData(t)
+	srv := New(data)
+
+	t.Run("Update successfully", func(t *testing.T) {
+		input := item.Core{Nama_Barang: "One Piece"}
+		resData := item.Core{
+			ID:          1,
+			Nama_Barang: "One Piece",
+			Image_url:   "www.google.com",
+			Nama:        "fajar1411",
+		}
+
+		data.On("update", 1, 1, input).Return(resData, nil).Once()
+		_, token := helper.GenerateJWT(1)
+		useToken := token.(*jwt.Token)
+		useToken.Valid = true
+		srv := New(data)
+		RES, err := srv.Update(useToken, 1, input)
+
+		assert.Nil(t, err)
+		assert.Equal(t, resData.Nama_Barang, RES.Nama_Barang)
+		assert.Equal(t, resData.ID, RES.ID)
+		assert.Equal(t, resData.Nama, RES.Nama)
+
+		data.AssertExpectations(t)
+	})
+	t.Run("Update error user not found", func(t *testing.T) {
+		input := item.Core{Nama_Barang: "One Piece"}
+		// resData := item.Core{
+		// 	ID:          1,
+		// 	Nama_Barang: "One Piece",
+		// 	Image_url:   "www.google.com",
+		// 	Nama:        "fajar1411",
+		// }
+
+		token := jwt.New(jwt.SigningMethodHS256)
+		actual, err := srv.Update(token, 1, input)
+
+		// Test
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "id user not found")
+		assert.Empty(t, actual)
+	})
+	t.Run("Update error post not found", func(t *testing.T) {
+		// Programming input and return repo
+		input := item.Core{Nama_Barang: "One Piece"}
+		data.On("Update", 1, 1, input).Return(item.Core{}, errors.New("not found")).Once()
+
+		// Program service
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		actual, err := srv.Update(token, 1, input)
+
+		// Test
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "item not found")
+		assert.Empty(t, actual)
+		data.AssertExpectations(t)
+	})
+	t.Run("Update error internal server", func(t *testing.T) {
+		// Programming input and return repo
+		input := item.Core{ID: 1, Nama_Barang: "One Piece"}
+		data.On("Update", 1, 1, input).Return(item.Core{}, errors.New("internal server error")).Once()
+
+		// Program service
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		actual, err := srv.Update(pToken, 1, input)
+
+		// Test
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "internal server error")
+		assert.Empty(t, actual)
+		data.AssertExpectations(t)
+	})
+}
 func TestGetAllItems(t *testing.T) {
 	data := mocks.NewItemData(t)
 
@@ -299,7 +379,7 @@ func TestGetAllItems(t *testing.T) {
 		assert.EqualError(t, err, "Products not found")
 		assert.Nil(t, res)
 	})
-	t.Run("Get all book error server", func(t *testing.T) {
+	t.Run("Get all item error server", func(t *testing.T) {
 		// Programming input and return repo
 		data.On("GetAllItems").Return([]item.Core{}, errors.New("internal server error")).Once()
 
@@ -314,9 +394,7 @@ func TestGetAllItems(t *testing.T) {
 	})
 }
 
-func TestUpdatePost(t *testing.T) {
-
-	input := item.Core{Deskripsi: "biru asik"}
+func TestIDItem(t *testing.T) {
 	resData := item.Core{
 		ID:          1,
 		Nama_Barang: "baju",
@@ -329,62 +407,48 @@ func TestUpdatePost(t *testing.T) {
 	data := mocks.NewItemData(t)
 
 	srv := New(data)
+	t.Run("getid successfully", func(t *testing.T) {
+		data.On("GetID", 1).Return(resData, nil).Once()
 
-	t.Run("Update successfully", func(t *testing.T) {
-		data.On("Update", 1, 1).Return(resData, nil).Once()
+		actual, err := srv.GetID(1)
 
-		_, token := helper.GenerateJWT(1)
-		pToken := token.(*jwt.Token)
-		pToken.Valid = true
-		actual, err := srv.Update(token, 1, input)
-
-		assert.Nil(t, err)
-		assert.NotEqual(t, resData.Deskripsi, actual.Deskripsi)
+		assert.NoError(t, err)
 		assert.Equal(t, resData.ID, actual.ID)
-		assert.Equal(t, resData.Nama, actual.Nama)
+		data.AssertExpectations(t)
 
+	})
+	t.Run("not found", func(t *testing.T) {
+		// resData := item.Core{
+		// 	ID:          1,
+		// 	Nama_Barang: "baju",
+		// 	Deskripsi:   "biru asik",
+		// 	Stok:        1,
+		// 	Harga:       20000,
+		// 	Nama:        "fajar",
+		// }
+		data.On("GetID", 1).Return(item.Core{}, errors.New("not found")).Once()
+
+		res, err := srv.GetID(1)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "ID Product not found")
+		assert.Equal(t, uint(0), res.ID)
 		data.AssertExpectations(t)
 	})
-	t.Run("Update error user not found", func(t *testing.T) {
+	t.Run("terdapat masalah pada server", func(t *testing.T) {
+		// resData := item.Core{
+		// 	ID:          1,
+		// 	Nama_Barang: "baju",
+		// 	Deskripsi:   "biru asik",
+		// 	Stok:        1,
+		// 	Harga:       20000,
+		// 	Nama:        "fajar",
+		// }
+		data.On("GetID", 1).Return(item.Core{}, errors.New("terdapat masalah pada server")).Once()
 
-		token := jwt.New(jwt.SigningMethodHS256)
-		actual, err := srv.Update(token, 1, input)
-
-		// Test
+		res, err := srv.GetID(1)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "id user not found")
-		assert.Empty(t, actual)
-	})
-	t.Run("Update error item not found", func(t *testing.T) {
-		// Programming input and return repo
-		data.On("Update", 1, 1, input).Return(item.Core{}, errors.New("not found")).Once()
-
-		// Program service
-		_, token := helper.GenerateJWT(1)
-		pToken := token.(*jwt.Token)
-		pToken.Valid = true
-		actual, err := srv.Update(token, 1, input)
-
-		// Test
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "item not found")
-		assert.Empty(t, actual)
-		data.AssertExpectations(t)
-	})
-	t.Run("Update error internal server", func(t *testing.T) {
-		// Programming input and return repo
-		data.On("Update", 1, 1, input).Return(item.Core{}, errors.New("internal server error")).Once()
-
-		// Program service
-		_, token := helper.GenerateJWT(1)
-		pToken := token.(*jwt.Token)
-		pToken.Valid = true
-		actual, err := srv.Update(token, 1, input)
-
-		// Test
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "internal server error")
-		assert.Empty(t, actual)
+		assert.ErrorContains(t, err, "terdapat masalah pada server")
+		assert.Equal(t, uint(0), res.ID)
 		data.AssertExpectations(t)
 	})
 }
