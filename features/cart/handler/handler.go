@@ -36,3 +36,13 @@ func (ch *cartHandle) Add() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("success add data"))
 	}
 }
+
+func (ch *cartHandle) GetMyCart() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res, err := ch.srv.GetMyCart(c.Get("user"))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusOK, helper.PrintSuccessReponse("berhasil melihat list products dari keranjang", ToCartProductResArr(res)))
+	}
+}

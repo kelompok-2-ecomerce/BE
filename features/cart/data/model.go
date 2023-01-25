@@ -13,6 +13,7 @@ type Cart struct {
 	ImageUrl    string
 	Price       float64
 	Qty         int
+	Total       float64
 	Items       []Item `gorm:"many2many:cart_items;"`
 	UserID      uint
 	ItemID      uint
@@ -41,6 +42,7 @@ func ToCore(data Cart) cart.Core {
 		ImageUrl:    data.ImageUrl,
 		Price:       data.Price,
 		Qty:         data.Qty,
+		Total:       data.Total,
 	}
 }
 
@@ -50,6 +52,8 @@ func CoreToData(data cart.Core) Cart {
 		ImageUrl:    data.ImageUrl,
 		Price:       data.Price,
 		Qty:         data.Qty,
+		ItemID:      data.ItemID,
+		Total:       data.Total,
 	}
 }
 

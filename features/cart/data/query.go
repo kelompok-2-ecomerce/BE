@@ -110,14 +110,18 @@ func (cd *cartData) GetMyCart(userID int) ([]cart.Core, error) {
 	}
 	listProduct := []Cart{}
 	err := cd.db.Raw(`
-	SELECT i.id , i.nama_barang "ProductName", i.image_url, i.harga "Price", ci.qty 
+	SELECT  i.id "ItemID" , i.nama_barang "ProductName", i.image_url, i.harga "Price", ci.qty, COALESCE(SUM(i.harga*ci.qty),0) "Total"
 	FROM items i 
 	JOIN cart_items ci ON ci.item_id = i.id 
-	WHERE ci.cart_id = ?;
+	WHERE ci.cart_id = ?
+	GROUP BY ci.cart_id , ci.item_id ;
 	`, newCart.ID).Scan(&listProduct).Error
 	if err != nil {
 		log.Println("list cart product query error :", err.Error())
 		return []cart.Core{}, err
 	}
+	log.Println(listProduct[0].ItemID)
+	log.Println(listProduct[0].Total)
+
 	return ToCoreArr(listProduct), nil
 }

@@ -8,17 +8,18 @@ type Core struct {
 	ImageUrl    string
 	Price       float64
 	Qty         int
+	Total       float64
 	ItemID      uint
 }
 
 type CartHandler interface {
 	Add() echo.HandlerFunc
-	// GetMyCart() echo.HandlerFunc
+	GetMyCart() echo.HandlerFunc
 }
 
 type CartService interface {
 	Add(token interface{}, productId uint, qty int) (Core, error)
-	// GetMyCart(token interface{}) ([]Core, error)
+	GetMyCart(token interface{}) ([]Core, error)
 }
 
 type CartData interface {
