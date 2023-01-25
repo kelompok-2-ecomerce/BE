@@ -4,15 +4,16 @@ import (
 	"log"
 	"projects/config"
 
-	cd "projects/features/cart/data"
-	chl "projects/features/cart/handler"
-	csrv "projects/features/cart/services"
 	id "projects/features/item/data"
 	ihl "projects/features/item/handler"
 	isrv "projects/features/item/services"
 	"projects/features/user/data"
 	"projects/features/user/handler"
 	"projects/features/user/services"
+
+	cd "projects/features/cart/data"
+	chl "projects/features/cart/handler"
+	csrv "projects/features/cart/services"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -44,19 +45,21 @@ func main() {
 
 	e.POST("/register", userHdl.Register())
 	e.POST("/login", userHdl.Login())
-	// e.GET("/users", userHdl.AllUser())
+	e.GET("/users", userHdl.AllUser())
 	e.GET("/users", userHdl.Profile(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/users", userHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/users", userHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	e.POST("/products", itemHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/products", itemHdl.GetAllItems())
+	e.GET("/products", itemHdl.GetAllProducts())
+	e.GET("/myproducts", itemHdl.GetAllProducts(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/products/:id", itemHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/myproducts", itemHdl.MyItem(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.DELETE("/products/:id", itemHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/products/:id", itemHdl.GetID())
+	e.GET("/products/:idProduct", itemHdl.GetProductByID(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.DELETE("/products/:idProduct", itemHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 
-	e.POST("/carts", cartHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.POST("/carts/:idProduct", cartHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/carts", cartHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
+
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
 	}

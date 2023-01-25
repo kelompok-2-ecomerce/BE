@@ -5,11 +5,11 @@ import (
 )
 
 type AddUpdatePostingRequest struct {
-	Nama_Barang string  `form:"nama_barang"`
-	Harga       float64 `form:"harga"`
-	Stok        int     `form:"stok"`
-	Deskripsi   string  `form:"deskripsi"`
-	Image_url   string
+	Nama_Barang string  `json:"name" form:"name"`
+	Harga       float64 `json:"harga" form:"harga"`
+	Stok        int     `json:"stok" form:"stok"`
+	Deskripsi   string  `json:"description" form:"description"`
+	Image_url   string  `json:"image" form:"image"`
 }
 
 func (data *AddUpdatePostingRequest) reqToCore() item.Core {

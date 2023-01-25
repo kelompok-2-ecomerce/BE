@@ -1,30 +1,18 @@
 package handler
 
-import (
-	"projects/features/cart"
-)
+import "projects/features/cart"
 
-type AddUpdateCartRequest struct {
-	ItemID uint   `form:"itemid"`
-	Qty    string `form:"qty"`
-}
-
-func (data *AddUpdateCartRequest) reqToCore() cart.Core {
-	return cart.Core{
-		Qty:    data.Qty,
-		ItemID: data.ItemID,
-	}
+type AddCartReq struct {
+	Qty int `json:"qty" form:"qty"`
 }
 
 func ToCore(data interface{}) *cart.Core {
 	res := cart.Core{}
 
 	switch data.(type) {
-	case AddUpdateCartRequest:
-		cnv := data.(AddUpdateCartRequest)
+	case AddCartReq:
+		cnv := data.(AddCartReq)
 		res.Qty = cnv.Qty
-		res.ItemID = cnv.ItemID
-
 	default:
 		return nil
 	}

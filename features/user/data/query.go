@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"projects/features/user"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -32,7 +33,14 @@ func (uq *userQuery) Register(newUser user.Core) (user.Core, error) {
 	cnv := CoreToData(newUser)
 	err := uq.db.Create(&cnv).Error
 	if err != nil {
-		return user.Core{}, err
+		log.Println("register query error", err.Error())
+		msg := ""
+		if strings.Contains(err.Error(), "Duplicate") {
+			msg = "data is duplicated"
+		} else {
+			msg = "server error"
+		}
+		return user.Core{}, errors.New(msg)
 	}
 
 	newUser.ID = cnv.ID
@@ -48,17 +56,16 @@ func (uq *userQuery) Profile(id uint) (user.Core, error) {
 
 	return ToCore(res), nil
 }
+func (uq *userQuery) AllUser() ([]user.Core, error) {
+	var user []User
 
-// func (uq *userQuery) AllUser() ([]user.Core, error) {
-// 	var user []User
-
-// 	tx := uq.db.Raw("SELECT users.id, users.name, users.email, users.username  From users WHERE users.deleted_at IS NULL").Find(&user)
-// 	if tx.Error != nil {
-// 		return nil, tx.Error
-// 	}
-// 	var dataCore = listModelToCore(user)
-// 	return dataCore, nil
-// }
+	tx := uq.db.Raw("SELECT users.id, users.name, users.email, users.username  From users WHERE users.deleted_at IS NULL").Find(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var dataCore = listModelToCore(user)
+	return dataCore, nil
+}
 
 func (uq *userQuery) Update(id uint, updateData user.Core) (user.Core, error) {
 	userModel := CoreToData(updateData)
@@ -71,7 +78,7 @@ func (uq *userQuery) Update(id uint, updateData user.Core) (user.Core, error) {
 		return user.Core{}, Input.Error
 	}
 	if Input.RowsAffected <= 0 {
-		return user.Core{}, errors.New("Not found")
+		return user.Core{}, errors.New("not found")
 	}
 
 	return ToCore(userModel), nil

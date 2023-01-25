@@ -1,70 +1,55 @@
 package helper
 
 import (
-	"context"
 	"fmt"
-	"math/rand"
-	"os"
-	"time"
+	"mime/multipart"
+	_config "projects/config"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
 )
 
-// CREATE RANDOM STRING
+func UploadImageToS3(fileName string, fileData multipart.File) (string, error) {
+	// The session the S3 Uploader will use
+	sess := _config.GetSession()
 
-const charset = "abcdefghijklmnopqrstuvwxyz" +
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	// Create an uploader with the session and default options
+	uploader := s3manager.NewUploader(sess)
 
-var seededRand *rand.Rand = rand.New(
-	rand.NewSource(time.Now().UnixNano()))
+	// Upload the file to S3.
+	result, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket:      aws.String(_config.AWS_BUCKET),
+		Key:         aws.String(fileName),
+		Body:        fileData,
+		ContentType: aws.String("image"),
+		ACL:         aws.String("public-read"),
+	})
 
-func autoGenerate(length int, charset string) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
-}
-
-func String(length int) string {
-	return autoGenerate(length, charset)
-}
-
-// UPLOAD FOTO PROFILE TO AWS S3
-
-func UploadImage(c echo.Context) (string, error) {
-
-	file, fileheader, err := c.Request().FormFile("file")
 	if err != nil {
-		fmt.Print("\n\nfailed get pah file. err = ", err)
-		return "", err
+		return "", fmt.Errorf("failed to upload file, %v", err)
+	}
+	return result.Location, nil
+}
+
+func CheckFileExtension(filename string) (string, error) {
+	extension := strings.ToLower(filename[strings.LastIndex(filename, ".")+1:])
+
+	if extension != "jpg" && extension != "jpeg" && extension != "png" {
+		return "", fmt.Errorf("forbidden file type")
+	}
+	return extension, nil
+}
+
+func CheckFileSize(size int64) error {
+	var fileSize int64 = 1097152
+	if size == 0 {
+		return fmt.Errorf("illegal file size")
 	}
 
-	randomStr := String(20)
-
-	godotenv.Load("local.env")
-
-	s3Config := &aws.Config{
-		Region:      aws.String(os.Getenv("AWS_REGION")),
-		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_KEY"), os.Getenv("S3_SECRET"), ""),
+	if size > fileSize {
+		return fmt.Errorf("file size too big, %d MB", fileSize/1000000)
 	}
-	s3Session := session.New(s3Config)
 
-	uploader := s3manager.NewUploader(s3Session)
-
-	input := &s3manager.UploadInput{
-		Bucket:      aws.String(os.Getenv("AWS_BUCKET")),                           // bucket's name
-		Key:         aws.String("images/" + randomStr + "-" + fileheader.Filename), // files destination location
-		Body:        file,                                                          // content of the file
-		ContentType: aws.String("image/jpg"),                                       // content type
-	}
-	res, err := uploader.UploadWithContext(context.Background(), input)
-	fmt.Println("\n\nerror upload to s3. err = ", err)
-	// RETURN URL LOCATION IN AWS
-	return res.Location, err
+	return nil
 }
