@@ -1,0 +1,29 @@
+Buatlah sebuah open API spec untuk mengakomodir keperluan berikut:
+
+1. Register:
+register memerlukan nama, email, dan password
+
+2. Login:
+login menggunakan email dan password.
+
+3. Sediakan endpoint untuk menampilkan daftar user yang telah terdaftar pada sistem
+
+4. Sediakan endpoint untuk mengubah data(nama atau password) dari user tertentu.
+
+5. Sediakan endpoint untuk menghapus data milik user tertentu.
+
+
+Buat beberapa response dan object yang dapat digunakan kembali.
+
+Upload ke Github Organization,
+
+Nama Repo : openapi
+Deadline : 03/01/2023
+
+* Bagi yang belom buat Organization:
+Nama organization : BE14-<nama_panggilan>
+invite : jerry@alterra.id
+
+Good luck
+
+

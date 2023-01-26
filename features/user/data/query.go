@@ -56,16 +56,6 @@ func (uq *userQuery) Profile(id uint) (user.Core, error) {
 
 	return ToCore(res), nil
 }
-func (uq *userQuery) AllUser() ([]user.Core, error) {
-	var user []User
-
-	tx := uq.db.Raw("SELECT users.id, users.name, users.email, users.username  From users WHERE users.deleted_at IS NULL").Find(&user)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	var dataCore = listModelToCore(user)
-	return dataCore, nil
-}
 
 func (uq *userQuery) Update(id uint, updateData user.Core) (user.Core, error) {
 	userModel := CoreToData(updateData)

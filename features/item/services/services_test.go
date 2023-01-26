@@ -1,264 +1,433 @@
 package services
 
-// import (
-// 	"errors"
-// 	"projects/features/item"
+import (
+	"bytes"
+	"errors"
+	"io"
+	"log"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"projects/features/item"
 
-// 	"projects/helper"
-// 	"projects/mocks"
-// 	"testing"
+	"projects/helper"
+	"projects/mocks"
+	"testing"
 
-// 	"github.com/golang-jwt/jwt"
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/golang-jwt/jwt"
+	"github.com/stretchr/testify/assert"
+)
 
-// func TestAdd(t *testing.T) {
-// 	data := mocks.NewItemData(t)
-// 	t.Run("Berhasil Menambahkan Item", func(t *testing.T) {
-// 		type SampleUsers struct {
-// 			ID   int
-// 			Name string
-// 		}
-// 		sample := SampleUsers{
-// 			ID:   1,
-// 			Name: "fajar1411",
-// 		}
-// 		inputData := item.Core{
-// 			ID:          1,
-// 			Nama_Barang: "Baju",
-// 			Image_url:   "www.google.com",
-// 			Deskripsi:   "biru asik",
-// 			Stok:        1,
-// 			Harga:       20000,
-// 			Nama:        sample.Name,
-// 		}
+func TestAdd(t *testing.T) {
+	data := mocks.NewItemData(t)
+	t.Run("Berhasil Menambahkan Item", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   1,
+			Name: "fajar1411",
+		}
+		inputData := item.Core{
+			ID:          1,
+			Nama_Barang: "Baju",
+			Image_url:   "www.google.com",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    sample.Name,
+		}
 
-// 		Respon := item.Core{
-// 			ID:          1,
-// 			Nama_Barang: inputData.Nama_Barang,
-// 			Image_url:   inputData.Image_url,
-// 			Deskripsi:   inputData.Deskripsi,
-// 			Stok:        inputData.Stok,
-// 			Harga:       inputData.Harga,
-// 		}
+		Respon := item.Core{
+			ID:          1,
+			Nama_Barang: inputData.Nama_Barang,
+			Image_url:   inputData.Image_url,
+			Deskripsi:   inputData.Deskripsi,
+			Stok:        inputData.Stok,
+			Harga:       inputData.Harga,
+		}
 
-// 		_, token := helper.GenerateJWT(sample.ID)
-// 		useToken := token.(*jwt.Token)
-// 		useToken.Valid = true
+		data.On("Add", sample.ID, inputData).Return(Respon, nil).Once()
+		srv := New(data)
+		f, _ := os.Open("./files/ImYoonAh.JPG")
 
-// 		data.On("Add", sample.ID, inputData).Return(Respon, nil).Once()
-// 		srv := New(data)
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		part, err := writer.CreateFormFile("image", "./files/ImYoonAh.JPG")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-// 		res, err := srv.Add(useToken, inputData)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, Respon.ID, res.ID)
-// 		assert.Equal(t, Respon.Nama, res.Nama)
-// 		data.AssertExpectations(t)
-// 	})
-// 	t.Run("jwt tidak valid", func(t *testing.T) {
-// 		type SampleUsers struct {
-// 			ID   int
-// 			Name string
-// 		}
-// 		sample := SampleUsers{
-// 			ID:   1,
-// 			Name: "fajar1411",
-// 		}
-// 		inputData := item.Core{
-// 			ID:          1,
-// 			Nama_Barang: "Baju",
-// 			Image_url:   "www.google.com",
-// 			Deskripsi:   "biru asik",
-// 			Stok:        1,
-// 			Harga:       20000,
-// 			Nama:        sample.Name,
-// 		}
-// 		srv := New(data)
-// 		_, token := helper.GenerateJWT(sample.ID)
+		_, err = io.Copy(part, f)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		writer.Close()
+		req, _ := http.NewRequest("POST", "/products", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 
-// 		res, err := srv.Add(token, inputData)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "user not found")
-// 		assert.Equal(t, uint(0), res.ID) //perbandingan
-// 	})
+		_, header, _ := req.FormFile("image")
+		_, token := helper.GenerateJWT(sample.ID)
+		useToken := token.(*jwt.Token)
+		useToken.Valid = true
+		res, err := srv.Add(useToken, inputData, header)
+		assert.Nil(t, err)
+		assert.Equal(t, Respon.ID, res.ID)
+		assert.Equal(t, Respon.NamaUser, res.NamaUser)
+		data.AssertExpectations(t)
+	})
+	t.Run("jwt tidak valid", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   1,
+			Name: "fajar1411",
+		}
+		inputData := item.Core{
+			ID:          1,
+			Nama_Barang: "Baju",
+			Image_url:   "www.google.com",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    sample.Name,
+		}
+		srv := New(data)
+		_, token := helper.GenerateJWT(sample.ID)
+		f, _ := os.Open("./files/ImYoonAh.JPG")
 
-// 	t.Run("data not found", func(t *testing.T) {
-// 		type SampleUsers struct {
-// 			ID   int
-// 			Name string
-// 		}
-// 		sample := SampleUsers{
-// 			ID:   4,
-// 			Name: "fajar1411",
-// 		}
-// 		inputData := item.Core{
-// 			ID:          1,
-// 			Nama_Barang: "Baju",
-// 			Image_url:   "www.google.com",
-// 			Deskripsi:   "biru asik",
-// 			Stok:        1,
-// 			Harga:       20000,
-// 			Nama:        sample.Name,
-// 		}
-// 		data.On("Add", sample.ID, inputData).Return(item.Core{}, errors.New("data not found")).Once()
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		part, err := writer.CreateFormFile("image", "./files/ImYoonAh.JPG")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-// 		srv := New(data)
+		_, err = io.Copy(part, f)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		writer.Close()
+		req, _ := http.NewRequest("POST", "/products", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 
-// 		_, token := helper.GenerateJWT(sample.ID)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		res, err := srv.Add(pToken, inputData)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "Items not found")
-// 		assert.Equal(t, uint(0), res.ID)
-// 		data.AssertExpectations(t)
-// 	})
-// 	t.Run("masalah di server", func(t *testing.T) {
-// 		type SampleUsers struct {
-// 			ID   int
-// 			Name string
-// 		}
-// 		sample := SampleUsers{
-// 			ID:   4,
-// 			Name: "fajar1411",
-// 		}
-// 		inputData := item.Core{
-// 			ID:          1,
-// 			Nama_Barang: "Baju",
-// 			Image_url:   "www.google.com",
-// 			Deskripsi:   "biru asik",
-// 			Stok:        1,
-// 			Harga:       20000,
-// 			Nama:        sample.Name,
-// 		}
-// 		data.On("Add", sample.ID, inputData).Return(item.Core{}, errors.New("internal server error")).Once()
-// 		srv := New(data) //new service
+		_, header, _ := req.FormFile("image")
+		res, err := srv.Add(token, inputData, header)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "user tidak ditemukan")
+		assert.Equal(t, uint(0), res.ID) //perbandingan
+	})
+	t.Run("format input file tidak dapat dibuka", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   4,
+			Name: "fajar1411",
+		}
+		inputData := item.Core{
+			ID:          1,
+			Nama_Barang: "Baju",
+			Image_url:   "www.google.com",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    sample.Name,
+		}
 
-// 		_, token := helper.GenerateJWT(sample.ID)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		res, err := srv.Add(pToken, inputData)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, uint(0), res.ID)
-// 		data.AssertExpectations(t)
-// 	})
-// }
+		srv := New(data)
+		f, _ := os.Open("./files/OpenAPI.txt")
 
-// func TestDeletePost(t *testing.T) {
-// 	data := mocks.NewItemData(t)
+		defer f.Close()
 
-// 	srv := New(data)
-// 	t.Run("Delete Success", func(t *testing.T) {
-// 		data.On("Delete", 1, 1).Return(nil).Once()
+		file := &multipart.FileHeader{}
+		_, token := helper.GenerateJWT(sample.ID)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputData, file)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "format input file tidak dapat dibuka")
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		err := srv.Delete(token, 1)
+	t.Run("format input file type tidak diizinkan", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   4,
+			Name: "fajar1411",
+		}
+		inputData := item.Core{
+			ID:          1,
+			Nama_Barang: "Baju",
+			Image_url:   "www.google.com",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    sample.Name,
+		}
 
-// 		assert.Nil(t, err)
+		srv := New(data)
+		f, err := os.Open("./files/OpenAPI.txt")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		defer f.Close()
 
-// 		data.AssertExpectations(t)
-// 	})
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		part, err := writer.CreateFormFile("image", "./files/OpenAPI.txt")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-// 	t.Run("Delete Error", func(t *testing.T) {
-// 		data.On("Delete", 1, 1).Return(errors.New("user not found")).Once()
+		_, err = io.Copy(part, f)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		writer.Close()
+		req, _ := http.NewRequest("PUT", "/users", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		err := srv.Delete(token, 1)
+		_, header, _ := req.FormFile("image")
 
-// 		assert.NotNil(t, err)
+		_, token := helper.GenerateJWT(sample.ID)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputData, header)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "format input file type tidak diizinkan")
+		assert.Equal(t, res, item.Core{})
+	})
+	t.Run("format input file type tidak dapat diupload", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   4,
+			Name: "fajar1411",
+		}
+		inputData := item.Core{
+			ID:          1,
+			Nama_Barang: "Baju",
+			Image_url:   "www.google.com",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    sample.Name,
+		}
+		data.On("Add", sample.ID, inputData).Return(item.Core{}, errors.New("format input file type tidak dapat diupload")).Once()
 
-// 		data.AssertExpectations(t)
-// 	})
-// 	t.Run("Delete Error", func(t *testing.T) {
-// 		data.On("Delete", 1, 1).Return(errors.New("not found")).Once()
+		srv := New(data)
+		f, _ := os.Open("./files/ImYoonAh.JPG")
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		err := srv.Delete(token, 1)
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		part, err := writer.CreateFormFile("image", "./files/ImYoonAh.JPG")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "item not found")
-// 		data.AssertExpectations(t)
-// 	})
-// 	t.Run("Delete server error", func(t *testing.T) {
-// 		data.On("Delete", 1, 1).Return(errors.New("internal server error")).Once()
+		_, err = io.Copy(part, f)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		writer.Close()
+		req, _ := http.NewRequest("POST", "/products", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		err := srv.Delete(token, 1)
+		_, header, _ := req.FormFile("image")
+		_, token := helper.GenerateJWT(sample.ID)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputData, header)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "format input file type tidak dapat diupload")
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
+	t.Run("masalah di server", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   4,
+			Name: "fajar1411",
+		}
+		inputData := item.Core{
+			ID:          1,
+			Nama_Barang: "1",
+			Image_url:   "www.google.com",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    sample.Name,
+		}
+		data.On("Add", sample.ID, inputData).Return(item.Core{}, errors.New("internal server error")).Once()
+		srv := New(data) //new service
 
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "internal server error")
-// 		data.AssertExpectations(t)
-// 	})
-// }
+		_, token := helper.GenerateJWT(sample.ID)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputData, nil)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
+}
 
-// func TestMyItems(t *testing.T) {
-// 	data := mocks.NewItemData(t)
+func TestDeletePost(t *testing.T) {
+	data := mocks.NewItemData(t)
 
-// 	srv := New(data)
+	srv := New(data)
+	t.Run("Delete Success", func(t *testing.T) {
+		data.On("Delete", 1, 1).Return(nil).Once()
 
-// 	// Case: user ingin melihat list buku yang dimilikinya
-// 	t.Run("item succesfully", func(t *testing.T) {
-// 		resData := []item.Core{
-// 			{
-// 				ID:          1,
-// 				Nama_Barang: "Baju",
-// 				Image_url:   "www.google.com",
-// 				Deskripsi:   "biru asik",
-// 				Stok:        1,
-// 				Harga:       20000,
-// 			},
-// 			{
-// 				ID:          2,
-// 				Nama_Barang: "celana",
-// 				Image_url:   "www.google.com",
-// 				Deskripsi:   "biru asik",
-// 				Stok:        1,
-// 				Harga:       40000,
-// 			},
-// 		}
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		err := srv.Delete(token, 1)
 
-// 		// Programming input and return repo
-// 		data.On("MyItem", 1).Return(resData, nil).Once()
+		assert.Nil(t, err)
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		actual, err := srv.MyItem(token)
+		data.AssertExpectations(t)
+	})
 
-// 		// Test
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, resData[0].ID, actual[0].ID)
-// 		assert.Equal(t, resData[0].Nama_Barang, actual[0].Nama_Barang)
-// 		assert.Equal(t, resData[1].ID, actual[1].ID)
-// 		assert.Equal(t, resData[1].Harga, actual[1].Harga)
-// 	})
-// 	t.Run("jwt tidak valid", func(t *testing.T) {
-// 		type SampleUsers struct {
-// 			ID   int
-// 			Name string
-// 		}
-// 		sample := SampleUsers{
-// 			ID:   4,
-// 			Name: "fajar1411",
-// 		}
-// 		srv := New(data)
-// 		_, token := helper.GenerateJWT(sample.ID)
+	t.Run("Delete Error", func(t *testing.T) {
+		data.On("Delete", 1, 1).Return(errors.New("user not found")).Once()
 
-// 		res, err := srv.MyItem(token)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "user not found")
-// 		assert.Equal(t, uint(0), res) //perba
-// 	})
-// }
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		err := srv.Delete(token, 1)
+
+		assert.NotNil(t, err)
+
+		data.AssertExpectations(t)
+	})
+	t.Run("Delete Error", func(t *testing.T) {
+		data.On("Delete", 1, 1).Return(errors.New("not found")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		err := srv.Delete(token, 1)
+
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "product tidak ditemukan")
+		data.AssertExpectations(t)
+	})
+	t.Run("Delete server error", func(t *testing.T) {
+		data.On("Delete", 1, 1).Return(errors.New("terjadi kesalahan pada server")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		err := srv.Delete(token, 1)
+
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "terjadi kesalahan pada server")
+		data.AssertExpectations(t)
+	})
+}
+
+func TestMyItems(t *testing.T) {
+	data := mocks.NewItemData(t)
+
+	srv := New(data)
+
+	// Case: user ingin melihat list buku yang dimilikinya
+	t.Run("item succesfully", func(t *testing.T) {
+		resData := []item.Core{
+			{
+				ID:          1,
+				Nama_Barang: "Baju",
+				Image_url:   "www.google.com",
+				Deskripsi:   "biru asik",
+				Stok:        1,
+				Harga:       20000,
+			},
+			{
+				ID:          2,
+				Nama_Barang: "celana",
+				Image_url:   "www.google.com",
+				Deskripsi:   "biru asik",
+				Stok:        1,
+				Harga:       40000,
+			},
+		}
+
+		// Programming input and return repo
+		data.On("MyProducts", 1).Return(resData, nil).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		actual, err := srv.MyProducts(token)
+
+		// Test
+		assert.Nil(t, err)
+		assert.Equal(t, resData[0].ID, actual[0].ID)
+		assert.Equal(t, resData[0].Nama_Barang, actual[0].Nama_Barang)
+		assert.Equal(t, resData[1].ID, actual[1].ID)
+		assert.Equal(t, resData[1].Harga, actual[1].Harga)
+	})
+	t.Run("jwt tidak valid", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   4,
+			Name: "fajar1411",
+		}
+		srv := New(data)
+		_, token := helper.GenerateJWT(sample.ID)
+
+		res, err := srv.MyProducts(token)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "user tidak ditemukan")
+		assert.Equal(t, uint(0), res) //perba
+	})
+
+	t.Run("not found", func(t *testing.T) {
+
+		data.On("MyProducts", 1).Return([]item.Core{}, errors.New("not found")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.MyProducts(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "data tidak ditemukan")
+		assert.Equal(t, uint(0), res)
+	})
+
+	t.Run("terjadi kesalahan pada server", func(t *testing.T) {
+
+		data.On("MyProducts", 1).Return([]item.Core{}, errors.New("terjadi kesalahan pada server")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.MyProducts(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "terjadi kesalahan pada server")
+		assert.Equal(t, uint(0), res)
+	})
+
+}
+
 // func TestUpdateItem(t *testing.T) {
 
 // 	data := mocks.NewItemData(t)
@@ -332,67 +501,143 @@ package services
 // 		pToken.Valid = true
 // 		actual, err := srv.Update(pToken, 1, input)
 
-// 		// Test
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "internal server error")
-// 		assert.Empty(t, actual)
-// 		data.AssertExpectations(t)
-// 	})
-// }
-// func TestGetAllItems(t *testing.T) {
-// 	data := mocks.NewItemData(t)
+//			// Test
+//			assert.NotNil(t, err)
+//			assert.ErrorContains(t, err, "internal server error")
+//			assert.Empty(t, actual)
+//			data.AssertExpectations(t)
+//		})
+//	}
+func TestGetAllItems(t *testing.T) {
+	data := mocks.NewItemData(t)
 
-// 	srv := New(data)
+	srv := New(data)
 
-// 	t.Run("Item succesfully", func(t *testing.T) {
-// 		resData := []item.Core{
-// 			{
-// 				ID:          1,
-// 				Nama_Barang: "Baju",
-// 				Image_url:   "www.google.com",
-// 				Deskripsi:   "biru asik",
-// 				Stok:        1,
-// 				Harga:       20000,
-// 			},
-// 			{
-// 				ID:          2,
-// 				Nama_Barang: "celana",
-// 				Image_url:   "www.google.com",
-// 				Deskripsi:   "biru asik",
-// 				Stok:        1,
-// 				Harga:       40000,
-// 			},
-// 		}
-// 		data.On("GetAllItems").Return(resData, nil).Once()
+	t.Run("Item succesfully", func(t *testing.T) {
+		resData := []item.Core{
+			{
+				ID:          1,
+				Nama_Barang: "Baju",
+				Image_url:   "www.google.com",
+				Deskripsi:   "biru asik",
+				Stok:        1,
+				Harga:       20000,
+			},
+			{
+				ID:          2,
+				Nama_Barang: "celana",
+				Image_url:   "www.google.com",
+				Deskripsi:   "biru asik",
+				Stok:        1,
+				Harga:       40000,
+			},
+		}
+		data.On("GetAllProducts").Return(resData, nil).Once()
 
-// 		res, err := srv.GetAllItems()
-// 		assert.NoError(t, err)
-// 		assert.Equal(t, res, res)
-// 		data.AssertExpectations(t)
+		res, err := srv.GetAllProducts()
+		assert.NoError(t, err)
+		assert.Equal(t, res, res)
+		data.AssertExpectations(t)
 
-// 	})
-// 	t.Run("not found", func(t *testing.T) {
-// 		data.On("GetAllItems").Return(nil, errors.New("Products not found")).Once()
+	})
+	t.Run("not found", func(t *testing.T) {
+		data.On("GetAllProducts").Return(nil, errors.New("not found")).Once()
 
-// 		res, err := srv.GetAllItems()
-// 		assert.NotNil(t, err)
-// 		assert.EqualError(t, err, "Products not found")
-// 		assert.Nil(t, res)
-// 	})
-// 	t.Run("Get all item error server", func(t *testing.T) {
-// 		// Programming input and return repo
-// 		data.On("GetAllItems").Return([]item.Core{}, errors.New("internal server error")).Once()
+		res, err := srv.GetAllProducts()
+		assert.NotNil(t, err)
+		assert.EqualError(t, err, "data tidak ditemukan")
+		assert.Nil(t, res)
+	})
+	t.Run("Get all item error server", func(t *testing.T) {
+		// Programming input and return repo
+		data.On("GetAllProducts").Return([]item.Core{}, errors.New("internal server error")).Once()
 
-// 		// Program service
-// 		actual, err := srv.GetAllItems()
+		// Program service
+		actual, err := srv.GetAllProducts()
 
-// 		// Test
-// 		assert.NotNil(t, err)
-// 		assert.EqualError(t, err, "internal server error")
-// 		assert.Nil(t, actual)
+		// Test
+		assert.NotNil(t, err)
+		assert.EqualError(t, err, "terjadi kesalahan pada server")
+		assert.Nil(t, actual)
 
-// 	})
-// }
+	})
+}
+
+func TestGetProductByID(t *testing.T) {
+	data := mocks.NewItemData(t)
+
+	srv := New(data)
+
+	// Case: user ingin melihat list buku yang dimilikinya
+	t.Run("item succesfully", func(t *testing.T) {
+		resData := item.Core{
+			ID:          1,
+			Nama_Barang: "baju",
+			Deskripsi:   "biru asik",
+			Stok:        1,
+			Harga:       20000,
+			NamaUser:    "fajar",
+		}
+
+		// Programming input and return repo
+		data.On("GetProductByID", 1, 1).Return(resData, nil).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		actual, err := srv.GetProductByID(pToken, 1)
+
+		// Test
+		assert.Nil(t, err)
+		assert.NoError(t, err)
+		assert.Equal(t, resData.ID, actual.ID)
+		data.AssertExpectations(t)
+	})
+	t.Run("jwt tidak valid", func(t *testing.T) {
+		type SampleUsers struct {
+			ID   int
+			Name string
+		}
+		sample := SampleUsers{
+			ID:   4,
+			Name: "fajar1411",
+		}
+		srv := New(data)
+		_, token := helper.GenerateJWT(sample.ID)
+
+		res, err := srv.GetProductByID(token, 1)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "user tidak ditemukan")
+		assert.Equal(t, uint(0), res) //perba
+	})
+
+	t.Run("not found", func(t *testing.T) {
+
+		data.On("GetProductByID", 1, 1).Return(item.Core{}, errors.New("not found")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.GetProductByID(pToken, 1)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "data tidak ditemukan")
+		assert.Equal(t, uint(0), res)
+	})
+
+	t.Run("terjadi kesalahan pada server", func(t *testing.T) {
+
+		data.On("GetProductByID", 1, 1).Return(item.Core{}, errors.New("terjadi kesalahan pada server")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.GetProductByID(pToken, 1)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "terjadi kesalahan pada server")
+		assert.Equal(t, uint(0), res)
+	})
+
+}
 
 // func TestIDItem(t *testing.T) {
 // 	resData := item.Core{
