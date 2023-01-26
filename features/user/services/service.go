@@ -25,21 +25,21 @@ func New(ud user.UserData) user.UserService {
 	}
 }
 
-func (uuc *userUseCase) AllUser() ([]user.Core, error) {
-	data, err := uuc.qry.AllUser()
-	if err != nil {
-		msg := ""
-		if strings.Contains(err.Error(), "not found") {
-			msg = "user not found"
-		} else {
-			msg = "terdapat masalah pada server"
+// func (uuc *userUseCase) AllUser() ([]user.Core, error) {
+// 	data, err := uuc.qry.AllUser()
+// 	if err != nil {
+// 		msg := ""
+// 		if strings.Contains(err.Error(), "not found") {
+// 			msg = "user not found"
+// 		} else {
+// 			msg = "terdapat masalah pada server"
 
-		}
-		return nil, errors.New(msg)
+// 		}
+// 		return nil, errors.New(msg)
 
-	}
-	return data, nil
-}
+// 	}
+// 	return data, nil
+// }
 
 func (uuc *userUseCase) Login(email, password string) (string, user.Core, error) {
 
@@ -102,6 +102,7 @@ func (uuc *userUseCase) Profile(token interface{}) (user.Core, error) {
 	}
 	res, err := uuc.qry.Profile(uint(id))
 	if err != nil {
+		log.Println(err)
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "user tidak ditemukan harap login lagi"

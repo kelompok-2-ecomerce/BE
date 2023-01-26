@@ -22,7 +22,7 @@ type UserHandler interface {
 	Profile() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	Update() echo.HandlerFunc
-	AllUser() echo.HandlerFunc
+	// AllUser() echo.HandlerFunc
 }
 
 type UserService interface {
@@ -31,7 +31,7 @@ type UserService interface {
 	Profile(token interface{}) (Core, error)
 	Update(token interface{}, updateData Core, image *multipart.FileHeader) (Core, error)
 	Delete(token interface{}) (Core, error)
-	AllUser() ([]Core, error)
+	// AllUser() ([]Core, error)
 }
 
 type UserData interface {
@@ -40,5 +40,5 @@ type UserData interface {
 	Profile(id uint) (Core, error)
 	Update(id uint, updateData Core) (Core, error)
 	Delete(id uint) (Core, error)
-	AllUser() ([]Core, error)
+	// AllUser() ([]Core, error)
 }
