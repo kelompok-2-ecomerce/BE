@@ -51,7 +51,7 @@ func main() {
 
 	e.POST("/products", itemHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products", itemHdl.GetAllProducts())
-	e.GET("/myproducts", itemHdl.GetAllProducts(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/myproducts", itemHdl.MyProducts(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.PUT("/products/:id", itemHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/:idProduct", itemHdl.GetProductByID(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/products/:idProduct", itemHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
