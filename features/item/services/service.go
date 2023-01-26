@@ -52,11 +52,11 @@ func (ps *itemSrv) Add(token interface{}, newItem item.Core, file *multipart.Fil
 
 		photo, err := helper.UploadImageToS3(filename, src)
 		if err != nil {
-			return item.Core{}, errors.New("format input file type tidak dapat diupload")
+			log.Println(errors.New("upload to s3 bucket failed"))
 		}
-
-		newItem.Image_url = photo
-
+		if len(photo) > 0 {
+			newItem.Image_url = photo
+		}
 		defer src.Close()
 	}
 
@@ -186,11 +186,12 @@ func (ps *itemSrv) Update(token interface{}, itemID int, updatedData item.Core, 
 
 		photo, err := helper.UploadImageToS3(filename, src)
 		if err != nil {
-			return item.Core{}, errors.New("format input file type tidak dapat diupload")
+			log.Println(errors.New("upload to s3 bucket failed"))
 		}
 
-		updatedData.Image_url = photo
-
+		if len(photo) > 0 {
+			updatedData.Image_url = photo
+		}
 		defer src.Close()
 	}
 

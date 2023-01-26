@@ -25,22 +25,6 @@ func New(ud user.UserData) user.UserService {
 	}
 }
 
-// func (uuc *userUseCase) AllUser() ([]user.Core, error) {
-// 	data, err := uuc.qry.AllUser()
-// 	if err != nil {
-// 		msg := ""
-// 		if strings.Contains(err.Error(), "not found") {
-// 			msg = "user not found"
-// 		} else {
-// 			msg = "terdapat masalah pada server"
-
-// 		}
-// 		return nil, errors.New(msg)
-
-// 	}
-// 	return data, nil
-// }
-
 func (uuc *userUseCase) Login(email, password string) (string, user.Core, error) {
 
 	err := helper.Validasi(helper.ToEmailLoginString(email))
