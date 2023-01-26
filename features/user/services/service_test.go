@@ -283,7 +283,7 @@ func TestUpdate(t *testing.T) {
 
 		srv := New(repo)
 
-		f, err := os.Open("./ImYoonAh.JPG")
+		f, err := os.Open("./files/ImYoonAh.JPG")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -291,7 +291,7 @@ func TestUpdate(t *testing.T) {
 
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
-		part, err := writer.CreateFormFile("image", "./ImYoonAh.JPG")
+		part, err := writer.CreateFormFile("image", "./files/ImYoonAh.JPG")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -341,7 +341,7 @@ func TestUpdate(t *testing.T) {
 
 		srv := New(repo)
 
-		f, err := os.Open("./ImYoonAh.JPG")
+		f, err := os.Open("./files/ImYoonAh.JPG")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -349,7 +349,7 @@ func TestUpdate(t *testing.T) {
 
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
-		part, err := writer.CreateFormFile("image", "./ImYoonAh.JPG")
+		part, err := writer.CreateFormFile("image", "./files/ImYoonAh.JPG")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -423,7 +423,7 @@ func TestUpdate(t *testing.T) {
 
 		srv := New(repo)
 
-		f, err := os.Open("./wallpaper.jpg")
+		f, err := os.Open("./files/wallpaper.jpg")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -431,7 +431,7 @@ func TestUpdate(t *testing.T) {
 
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
-		part, err := writer.CreateFormFile("image", "./wallpaper.jpg")
+		part, err := writer.CreateFormFile("image", "./files/wallpaper.jpg")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -469,7 +469,7 @@ func TestUpdate(t *testing.T) {
 
 		srv := New(repo)
 
-		f, err := os.Open("./OpenAPI.txt")
+		f, err := os.Open("./files/OpenAPI.txt")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -477,7 +477,7 @@ func TestUpdate(t *testing.T) {
 
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
-		part, err := writer.CreateFormFile("image", "./OpenAPI.txt")
+		part, err := writer.CreateFormFile("image", "./files/OpenAPI.txt")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -515,7 +515,7 @@ func TestUpdate(t *testing.T) {
 
 		srv := New(repo)
 
-		f, err := os.Open("./OpenAPI.txt")
+		f, err := os.Open("./files/OpenAPI.txt")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
