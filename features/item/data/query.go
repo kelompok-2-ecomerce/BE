@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"projects/features/item"
-	"strings"
 
 	"gorm.io/gorm"
 )
@@ -26,15 +25,8 @@ func (pd *itemData) Add(userID int, newItem item.Core) (item.Core, error) {
 
 	err := pd.db.Create(&cnv).Error
 	if err != nil {
-		log.Println("add item query error", err.Error())
-		msg := ""
-		if strings.Contains(err.Error(), "not valid") {
-			msg = "wrong input"
-
-		} else {
-			msg = "server error"
-		}
-		return item.Core{}, errors.New(msg)
+		log.Println("add comment query error :", err.Error())
+		return item.Core{}, err
 	}
 
 	newItem.ID = cnv.ID

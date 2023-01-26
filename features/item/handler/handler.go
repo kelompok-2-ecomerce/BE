@@ -47,7 +47,7 @@ func (ph *itemHandle) Add() echo.HandlerFunc {
 
 		// item := ToResponse("add", res)
 
-		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("uccess add data"))
+		return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("success add data"))
 		// return c.JSON(http.StatusCreated, helper.PrintSuccessReponse("sukses menambahkan barang", item))
 	}
 }
