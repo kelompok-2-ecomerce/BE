@@ -48,8 +48,8 @@ func (_m *ItemData) Delete(userID int, itemID int) error {
 	return r0
 }
 
-// GetAllItems provides a mock function with given fields:
-func (_m *ItemData) GetAllItems() ([]item.Core, error) {
+// GetAllProducts provides a mock function with given fields:
+func (_m *ItemData) GetAllProducts() ([]item.Core, error) {
 	ret := _m.Called()
 
 	var r0 []item.Core
@@ -71,20 +71,20 @@ func (_m *ItemData) GetAllItems() ([]item.Core, error) {
 	return r0, r1
 }
 
-// GetID provides a mock function with given fields: ItemID
-func (_m *ItemData) GetID(ItemID int) (item.Core, error) {
-	ret := _m.Called(ItemID)
+// GetProductByID provides a mock function with given fields: userID, productID
+func (_m *ItemData) GetProductByID(userID int, productID int) (item.Core, error) {
+	ret := _m.Called(userID, productID)
 
 	var r0 item.Core
-	if rf, ok := ret.Get(0).(func(int) item.Core); ok {
-		r0 = rf(ItemID)
+	if rf, ok := ret.Get(0).(func(int, int) item.Core); ok {
+		r0 = rf(userID, productID)
 	} else {
 		r0 = ret.Get(0).(item.Core)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(ItemID)
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(userID, productID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -92,8 +92,8 @@ func (_m *ItemData) GetID(ItemID int) (item.Core, error) {
 	return r0, r1
 }
 
-// MyItem provides a mock function with given fields: userID
-func (_m *ItemData) MyItem(userID int) ([]item.Core, error) {
+// MyProducts provides a mock function with given fields: userID
+func (_m *ItemData) MyProducts(userID int) ([]item.Core, error) {
 	ret := _m.Called(userID)
 
 	var r0 []item.Core

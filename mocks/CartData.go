@@ -13,25 +13,76 @@ type CartData struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: userID, newCart
-func (_m *CartData) Add(userID int, newCart cart.Core) (cart.Core, error) {
-	ret := _m.Called(userID, newCart)
+// Add provides a mock function with given fields: userID, productId, qty
+func (_m *CartData) Add(userID int, productId uint, qty int) (cart.Core, error) {
+	ret := _m.Called(userID, productId, qty)
 
 	var r0 cart.Core
-	if rf, ok := ret.Get(0).(func(int, cart.Core) cart.Core); ok {
-		r0 = rf(userID, newCart)
+	if rf, ok := ret.Get(0).(func(int, uint, int) cart.Core); ok {
+		r0 = rf(userID, productId, qty)
 	} else {
 		r0 = ret.Get(0).(cart.Core)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, cart.Core) error); ok {
-		r1 = rf(userID, newCart)
+	if rf, ok := ret.Get(1).(func(int, uint, int) error); ok {
+		r1 = rf(userID, productId, qty)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// DeleteProductCart provides a mock function with given fields: userID, productId
+func (_m *CartData) DeleteProductCart(userID int, productId uint) error {
+	ret := _m.Called(userID, productId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int, uint) error); ok {
+		r0 = rf(userID, productId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetMyCart provides a mock function with given fields: userID
+func (_m *CartData) GetMyCart(userID int) ([]cart.Core, error) {
+	ret := _m.Called(userID)
+
+	var r0 []cart.Core
+	if rf, ok := ret.Get(0).(func(int) []cart.Core); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]cart.Core)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateProductCart provides a mock function with given fields: userID, productId, qty
+func (_m *CartData) UpdateProductCart(userID int, productId uint, qty int) error {
+	ret := _m.Called(userID, productId, qty)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int, uint, int) error); ok {
+		r0 = rf(userID, productId, qty)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 type mockConstructorTestingTNewCartData interface {
