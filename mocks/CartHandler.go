@@ -28,6 +28,54 @@ func (_m *CartHandler) Add() echo.HandlerFunc {
 	return r0
 }
 
+// DeleteProductCart provides a mock function with given fields:
+func (_m *CartHandler) DeleteProductCart() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// GetMyCart provides a mock function with given fields:
+func (_m *CartHandler) GetMyCart() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
+// UpdateProductCart provides a mock function with given fields:
+func (_m *CartHandler) UpdateProductCart() echo.HandlerFunc {
+	ret := _m.Called()
+
+	var r0 echo.HandlerFunc
+	if rf, ok := ret.Get(0).(func() echo.HandlerFunc); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(echo.HandlerFunc)
+		}
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewCartHandler interface {
 	mock.TestingT
 	Cleanup(func())

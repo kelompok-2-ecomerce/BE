@@ -117,10 +117,13 @@ func (uuc *userUseCase) Profile(token interface{}) (user.Core, error) {
 func (uuc *userUseCase) Update(token interface{}, updateData user.Core, file *multipart.FileHeader) (user.Core, error) {
 	if updateData.Password != "" {
 		hashed := helper.HashPassword(updateData.Password)
-		updateData.Password = string(hashed)
+		updateData.Password = hashed
 	}
 
 	id := helper.ExtractToken(token)
+	if id <= 0 {
+		return user.Core{}, errors.New("user tidak ditemukan")
+	}
 
 	if len(updateData.Email) > 0 {
 		err := helper.Validasi(helper.ToEmailLogin(updateData))
@@ -155,10 +158,11 @@ func (uuc *userUseCase) Update(token interface{}, updateData user.Core, file *mu
 
 		photo, err := helper.UploadImageToS3(filename, src)
 		if err != nil {
-			return user.Core{}, errors.New("format input file type tidak dapat diupload")
+			log.Println(errors.New("upload to s3 bucket failed"))
 		}
-
-		updateData.Foto = photo
+		if len(photo) > 0 {
+			updateData.Foto = photo
+		}
 
 		defer src.Close()
 	}

@@ -45,8 +45,8 @@ func (_m *ItemHandler) Delete() echo.HandlerFunc {
 	return r0
 }
 
-// GetAllItems provides a mock function with given fields:
-func (_m *ItemHandler) GetAllItems() echo.HandlerFunc {
+// GetAllProducts provides a mock function with given fields:
+func (_m *ItemHandler) GetAllProducts() echo.HandlerFunc {
 	ret := _m.Called()
 
 	var r0 echo.HandlerFunc
@@ -61,8 +61,8 @@ func (_m *ItemHandler) GetAllItems() echo.HandlerFunc {
 	return r0
 }
 
-// GetID provides a mock function with given fields:
-func (_m *ItemHandler) GetID() echo.HandlerFunc {
+// GetProductByID provides a mock function with given fields:
+func (_m *ItemHandler) GetProductByID() echo.HandlerFunc {
 	ret := _m.Called()
 
 	var r0 echo.HandlerFunc
@@ -77,8 +77,8 @@ func (_m *ItemHandler) GetID() echo.HandlerFunc {
 	return r0
 }
 
-// MyItem provides a mock function with given fields:
-func (_m *ItemHandler) MyItem() echo.HandlerFunc {
+// MyProducts provides a mock function with given fields:
+func (_m *ItemHandler) MyProducts() echo.HandlerFunc {
 	ret := _m.Called()
 
 	var r0 echo.HandlerFunc
