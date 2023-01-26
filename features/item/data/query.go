@@ -82,7 +82,6 @@ func (id *itemData) GetAllProducts() ([]item.Core, error) {
 // MyPost implements item.ItemData
 func (id *itemData) MyProducts(userID int) ([]item.Core, error) {
 	res := []Item{}
-
 	err := id.db.Raw(`
 	SELECT i.id , i.nama_barang , i.image_url , u.nama "NamaUser", u.alamat , i.deskripsi ,i.harga , i.stok 
 	FROM items i 
