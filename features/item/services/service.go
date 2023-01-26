@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"projects/features/item"
 	"projects/helper"
@@ -124,9 +125,14 @@ func (is *itemSrv) GetAllProducts() ([]item.Core, error) {
 
 // MyPost implements item.ItemService
 func (is *itemSrv) MyProducts(token interface{}) ([]item.Core, error) {
-	res, err := is.data.GetAllProducts()
+	userID := helper.ExtractToken(token)
+	if userID <= 0 {
+		return []item.Core{}, errors.New("user tidak ditemukan")
+	}
+	res, err := is.data.MyProducts(userID)
 	if err != nil {
 		msg := ""
+		log.Println(err)
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data tidak ditemukan"
 		} else {
