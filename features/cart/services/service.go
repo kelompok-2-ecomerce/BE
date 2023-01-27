@@ -24,8 +24,10 @@ func New(ud cart.CartData) cart.CartService {
 
 func (cuc *cartUseCase) Add(token interface{}, productId uint, qty int) (cart.Core, error) {
 	err := helper.Validasi(helper.ToQtyInt(qty))
-	if err != nil {
-		return cart.Core{}, err
+
+	if err != nil || qty == 0 {
+		return cart.Core{}, errors.New("field required wajib diisi")
+
 	}
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
@@ -39,7 +41,7 @@ func (cuc *cartUseCase) Add(token interface{}, productId uint, qty int) (cart.Co
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data tidak ditemukan"
 		} else if strings.Contains(err.Error(), "stock") {
-			msg = "stok tidak cukup"
+			msg = "stok produk tidak cukup"
 		} else {
 			msg = "terjadi kesalahan pada server"
 		}
@@ -59,8 +61,6 @@ func (cuc *cartUseCase) GetMyCart(token interface{}) ([]cart.Core, error) {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data tidak ditemukan"
-		} else if strings.Contains(err.Error(), "stock") {
-			msg = "stok tidak cukup"
 		} else {
 			msg = "terjadi kesalahan pada server"
 		}
@@ -82,7 +82,7 @@ func (cuc *cartUseCase) UpdateProductCart(token interface{}, productId uint, qty
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data tidak ditemukan"
 		} else if strings.Contains(err.Error(), "stock") {
-			msg = "stok tidak cukup"
+			msg = "stok produk tidak cukup"
 		} else {
 			msg = "terjadi kesalahan pada server"
 		}
@@ -102,8 +102,6 @@ func (cuc *cartUseCase) DeleteProductCart(token interface{}, productId uint) err
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data tidak ditemukan"
-		} else if strings.Contains(err.Error(), "stock") {
-			msg = "stok tidak cukup"
 		} else {
 			msg = "terjadi kesalahan pada server"
 		}
